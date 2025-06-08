@@ -1,3 +1,4 @@
+import 'package:app_ban_tranh/screens/productdetail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
 
@@ -126,7 +127,7 @@ class ProductPageScreen extends StatelessWidget {
                   ),
                   itemCount: newArtworks.length,
                   itemBuilder: (context, index) {
-                    return _buildArtworkCard(newArtworks[index]);
+                    return _buildArtworkCard(context, newArtworks[index]);
                   },
                 )
               ])
@@ -138,7 +139,7 @@ class ProductPageScreen extends StatelessWidget {
   }
 }
 
-Widget _buildArtworkCard(ArtworkItem artwork) {
+Widget _buildArtworkCard(BuildContext context, ArtworkItem artwork) {
   return Container(
     decoration: BoxDecoration(
       color: Colors.white,
@@ -164,16 +165,29 @@ Widget _buildArtworkCard(ArtworkItem artwork) {
         // Hiển thị hình ảnh tác phẩm nghệ thuật
         Expanded(
           flex: 3,
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-              image: DecorationImage(
-                image: AssetImage(artwork.imagePath),
-                fit: BoxFit.cover,
+          child: GestureDetector(
+            onTap: () {
+              // Navigation đến ProductDetailScreen với productId
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailScreen(
+                    productId: artwork.id,
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+                image: DecorationImage(
+                  image: AssetImage(artwork.imagePath),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -230,7 +244,15 @@ Widget _buildArtworkCard(ArtworkItem artwork) {
                       height: 32,
                       child: OutlinedButton(
                         onPressed: () {
-                          print('View detail: ${artwork.title}');
+                          // Navigation đến ProductDetailScreen với productId
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductDetailScreen(
+                                productId: artwork.id,
+                              ),
+                            ),
+                          );
                         },
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Colors.grey),
@@ -270,6 +292,7 @@ Widget _buildArtworkCard(ArtworkItem artwork) {
                       child: IconButton(
                         onPressed: () {
                           print('Add to cart: ${artwork.title}');
+                          // Có thể thêm logic thêm vào giỏ hàng ở đây
                         },
                         icon: const Icon(
                           Icons.shopping_cart,
