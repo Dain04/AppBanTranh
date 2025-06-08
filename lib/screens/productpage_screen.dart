@@ -143,11 +143,18 @@ Widget _buildArtworkCard(ArtworkItem artwork) {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
+      // Thêm viền và bóng đổ
+      border: Border.all(
+        color: Colors.grey.withOpacity(0.3),
+        width: 1.5,
+      ),
+      // Bóng đổ nhẹ
       boxShadow: [
         BoxShadow(
-          color: Colors.grey.withOpacity(0.1),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
+          color: Colors.grey.withOpacity(0.3),
+          blurRadius: 12,
+          offset: const Offset(0, 4), // Vị trí bóng đổ
+          spreadRadius: 2, // Độ lan tỏa của bóng đổ
         ),
       ],
     ),

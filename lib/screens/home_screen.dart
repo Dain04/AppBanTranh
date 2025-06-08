@@ -409,10 +409,12 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        //theem viền
         border: Border.all(
           color: Colors.grey.withOpacity(0.3),
           width: 1.5,
         ),
+        // tạo độ bóng
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.3),
