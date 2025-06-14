@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
 
 class ProductDetailScreen extends StatefulWidget {
-  final String productId; // Thêm productId parameter
+  final String productId;
 
   const ProductDetailScreen({
     Key? key,
-    required this.productId, // Required parameter
+    required this.productId,
   }) : super(key: key);
 
   @override
@@ -15,37 +15,88 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   ArtworkItem? currentArtwork;
-  int selectedImageIndex = 0; // Biến để lưu chỉ số hình ảnh được chọn
-  PageController pageController = PageController(); // Controller cho PageView
-  ScrollController thumbnailScrollController = ScrollController(); //
+  int selectedImageIndex = 0;
+  PageController pageController = PageController();
+  ScrollController thumbnailScrollController = ScrollController();
+
+  // Danh sách ID tác phẩm yêu thích
+  List<String> _favoriteIds = [];
+
+  // Danh sách giỏ hàng (có thể chuyển thành state management sau này)
+  List<String> _cartItems = [];
 
   @override
   void initState() {
     super.initState();
-    // Tìm artwork theo ID từ dữ liệu mẫu
     _findArtworkById();
   }
 
   void _findArtworkById() {
-    // Tìm trong danh sách newArtworks trước
     try {
       currentArtwork = newArtworks.firstWhere(
         (artwork) => artwork.id == widget.productId,
       );
     } catch (e) {
-      // Nếu không tìm thấy trong newArtworks, tìm trong homenewArtworks
       try {
         currentArtwork = homenewArtworks.firstWhere(
           (artwork) => artwork.id == widget.productId,
         );
       } catch (e) {
-        // Không tìm thấy artwork nào
         currentArtwork = null;
       }
     }
   }
 
-  // Hàm xử lý khi người dùng nhấn vào hình thu nhỏ
+  // Hàm kiểm tra tác phẩm có được yêu thích không
+  bool _isFavorite(String id) {
+    return _favoriteIds.contains(id);
+  }
+
+  // Hàm toggle trạng thái yêu thích
+  void _toggleFavorite(String id) {
+    setState(() {
+      if (_favoriteIds.contains(id)) {
+        _favoriteIds.remove(id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đã xóa khỏi danh sách yêu thích'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      } else {
+        _favoriteIds.add(id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đã thêm vào danh sách yêu thích'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    });
+  }
+
+  // Hàm thêm vào giỏ hàng
+  void _addToCart(String id) {
+    setState(() {
+      if (!_cartItems.contains(id)) {
+        _cartItems.add(id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã thêm "${currentArtwork!.title}" vào giỏ hàng'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sản phẩm đã có trong giỏ hàng'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+    });
+  }
+
   void _onThumbnailTap(int index) {
     setState(() {
       selectedImageIndex = index;
@@ -56,20 +107,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       curve: Curves.easeInOut,
     );
 
-    // Scroll thumbnail để ảnh được chọn nằm giữa
     if (thumbnailScrollController.hasClients) {
       final screenWidth = MediaQuery.of(context).size.width;
+      const itemWidth = 80.0;
+      const itemSpacing = 16.0;
 
-      // Kích thước của mỗi thumbnail item (bao gồm padding)
-      const itemWidth = 80.0; // Kích thước cố định cho mỗi item
-      const itemSpacing = 16.0; // Khoảng cách giữa các item
-
-      // Tính toán vị trí cần scroll để item được chọn nằm giữa
       final targetOffset = (index * (itemWidth + itemSpacing)) -
           (screenWidth / 2) +
           (itemWidth / 2);
 
-      // Đảm bảo không scroll quá giới hạn
       final maxScrollExtent =
           thumbnailScrollController.position.maxScrollExtent;
       final clampedOffset = targetOffset.clamp(0.0, maxScrollExtent);
@@ -88,24 +134,75 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       appBar: AppBar(
         title: const Text('Back'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, size: 30), // Tăng kích thước icon
+          icon: const Icon(Icons.arrow_back, size: 30),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         actions: [
+          // Icon favorite
           Padding(
-            padding: const EdgeInsets.only(right: 30.0), //tăng lên là qua trái
+            padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
-                icon: const Icon(Icons.shopping_bag_outlined, size: 30),
-                //đi vào giỏ hàng khi bấm
-                onPressed: () {
-                  Navigator.pushNamed(context, '/cart'); // Chuyển đến
-                }),
+              icon: Icon(
+                _isFavorite(currentArtwork?.id ?? '')
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: _isFavorite(currentArtwork?.id ?? '')
+                    ? Colors.red
+                    : Colors.black,
+                size: 28,
+              ),
+              onPressed: () {
+                if (currentArtwork != null) {
+                  _toggleFavorite(currentArtwork!.id);
+                }
+              },
+            ),
+          ),
+          // Icon cart
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.shopping_bag_outlined, size: 30),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/cart');
+                  },
+                ),
+                // Badge hiển thị số lượng items trong cart
+                if (_cartItems.isNotEmpty)
+                  Positioned(
+                    right: 6,
+                    top: 6,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '${_cartItems.length}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
-        toolbarHeight: 60, // Tăng chiều cao AppBar để cân đối
-        leadingWidth: 70, // Đẩy icon leading qua bên trái một chút
+        toolbarHeight: 60,
+        leadingWidth: 70,
       ),
       body: currentArtwork == null
           ? const Center(
@@ -119,7 +216,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //tên sản phẩm
+                  // Tên sản phẩm
                   Text(
                     currentArtwork!.title,
                     style: const TextStyle(
@@ -128,6 +225,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
+
                   // Hình ảnh sản phẩm
                   Center(
                     child: Container(
@@ -161,15 +259,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  //Slider ảnh nhỏ - Layout căn giữa
+                  // Slider ảnh nhỏ
                   if (currentArtwork!.allImages.length > 1)
                     Center(
                       child: Container(
                         height: 80,
                         width: double.infinity,
                         child: currentArtwork!.allImages.length <= 4
-                            ? // Nếu ít hơn hoặc bằng 4 ảnh, hiển thị tất cả căn giữa
-                            Row(
+                            ? Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: List.generate(
                                   currentArtwork!.allImages.length,
@@ -219,8 +316,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   },
                                 ),
                               )
-                            : // Nếu nhiều hơn 4 ảnh, sử dụng ListView có thể scroll
-                            ListView.builder(
+                            : ListView.builder(
                                 controller: thumbnailScrollController,
                                 scrollDirection: Axis.horizontal,
                                 padding:
@@ -229,7 +325,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 itemBuilder: (context, index) {
                                   final isSelected =
                                       index == selectedImageIndex;
-
                                   return AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
                                     curve: Curves.easeInOut,
@@ -296,11 +391,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                     ),
                   const SizedBox(height: 20),
+
                   // Thông tin sản phẩm
                   Align(
                     alignment: Alignment.center,
                     child: Text(
-                      'Tác giả: ${currentArtwork!.artist}',
+                      'Tác giả: ${currentArtwork!.artist}',
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w500,
@@ -316,7 +412,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       TextSpan(
                         children: [
                           const TextSpan(
-                            text: 'Giá: ',
+                            text: 'Giá: ',
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -338,38 +434,158 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   const SizedBox(height: 30),
 
-                  // Nút thêm vào giỏ hàng
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Xử lý thêm vào giỏ hàng
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                                Text('Added ${currentArtwork!.title} to cart'),
+                  // Row chứa nút favorite và add to cart
+                  Row(
+                    children: [
+                      // Nút favorite
+                      Expanded(
+                        flex: 1,
+                        child: Container(
+                          height: 50,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              _toggleFavorite(currentArtwork!.id);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: _isFavorite(currentArtwork!.id)
+                                    ? Colors.red
+                                    : Colors.grey,
+                                width: 2,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Icon(
+                              _isFavorite(currentArtwork!.id)
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: _isFavorite(currentArtwork!.id)
+                                  ? Colors.red
+                                  : Colors.grey[600],
+                              size: 24,
+                            ),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text(
-                        'Add to Cart',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
+                      const SizedBox(width: 16),
+
+                      // Nút thêm vào giỏ hàng
+                      Expanded(
+                        flex: 3,
+                        child: SizedBox(
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              _addToCart(currentArtwork!.id);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.shopping_cart,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            label: const Text(
+                              'Thêm vào giỏ hàng',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                  // dòng kẻ
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      height: 1.5,
+                      width: 250,
+                      color: const Color.fromARGB(255, 89, 90, 90),
                     ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '"' + currentArtwork!.description + '"',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Color.fromARGB(255, 13, 13, 13),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // dòng kẻ
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      height: 1.5,
+                      width: 250,
+                      color: const Color.fromARGB(255, 89, 90, 90),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Chi tiết tác phẩm nghệ thuật',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black.withOpacity(0.8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Chất liệu: ${currentArtwork!.material}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          height: 1,
+                          width: 400,
+                          color: const Color.fromARGB(255, 89, 90, 90),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'Năm sáng tác: ${currentArtwork!.yearcreated}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          height: 1,
+                          width: 400,
+                          color: const Color.fromARGB(255, 89, 90, 90),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
     );
+  }
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    thumbnailScrollController.dispose();
+    super.dispose();
   }
 }
