@@ -7,6 +7,7 @@ class ArtworkItem {
   final String imagePath; //ảnh chính
   final String? material;
   final String? yearcreated; // Năm sáng tác (có thể để null nếu không có)
+  final String? category;
   final List<String> additionalImages; //danh sách ảnh phụ
 
   ArtworkItem({
@@ -17,7 +18,9 @@ class ArtworkItem {
     required this.description, // Mô tả
     required this.imagePath,
     required this.material,
+    required this.category,
     required this.yearcreated, // Năm sáng tác
+
     this.additionalImages = const [],
   });
   //getter lấy tất cả ảnh chính và phụ
@@ -33,6 +36,7 @@ final List<ArtworkItem> homenewArtworks = [
     price: 'Price on request',
     material: '',
     yearcreated: '2023', // Năm sáng tác
+    category: 'Hoa',
     imagePath: 'assets/images/flowerstyle.jpg',
     description: '', // Mô tả mặc định là rỗng
   ),
@@ -43,6 +47,7 @@ final List<ArtworkItem> homenewArtworks = [
     price: 'Price on request',
     material: '',
     yearcreated: '2023',
+    category: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
   ),
@@ -53,6 +58,7 @@ final List<ArtworkItem> homenewArtworks = [
     price: 'Price on request',
     material: '',
     yearcreated: '2023',
+    category: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
   ),
@@ -63,6 +69,7 @@ final List<ArtworkItem> homenewArtworks = [
     price: 'Price on request',
     material: '',
     yearcreated: '2023',
+    category: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
   ),
@@ -78,6 +85,7 @@ final List<ArtworkItem> newArtworks = [
       description:
           'Từ sâu thẳm khu rừng, một bản giao hưởng sắc màu hiện lên, là khúc ca rực rỡ của những loài hoa dại được vẽ nên bằng nét chạm tinh tế. Mỗi đóa hoa như một kiệt tác thu nhỏ, bừng nở sức sống, cánh hoa nhẹ nhàng bung nở tựa đôi cánh lụa mỏng.',
       imagePath: 'assets/images/flowerstyle.jpg',
+      category: 'Hoa',
       material: 'Acrylic',
       yearcreated: '1980',
       additionalImages: [
@@ -89,6 +97,7 @@ final List<ArtworkItem> newArtworks = [
     title: 'Think',
     artist: 'Doonstrij2',
     price: '\$1,300',
+    category: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
     yearcreated: '2023',
@@ -99,6 +108,7 @@ final List<ArtworkItem> newArtworks = [
     title: 'Old War',
     artist: 'Rune Quizzter',
     price: '\$1,800',
+    category: 'Hoa',
     yearcreated: '2023',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
@@ -109,6 +119,7 @@ final List<ArtworkItem> newArtworks = [
     title: 'Blood Falls',
     artist: 'Doonstrij2',
     yearcreated: '2023',
+    category: 'Hoa',
     price: '\$1,300',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',

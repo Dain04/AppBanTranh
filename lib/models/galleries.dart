@@ -25,7 +25,7 @@ final List<Galleries> homegalleries = [
     location: 'Hanoi, Vietnam',
     date_start: '2023-10-01',
     date_end: '2023-10-31',
-    imagePath: 'assets/images/flowerstyle.jpg',
+    imagePath: 'assets/images/gallery3.jpg',
     description:
         'An exhibition showcasing contemporary art from local artists.',
   ),
@@ -35,7 +35,7 @@ final List<Galleries> homegalleries = [
     location: 'Ho Chi Minh City, Vietnam',
     date_start: '2023-11-01',
     date_end: '2023-11-30',
-    imagePath: 'assets/images/flowerstyle.jpg',
+    imagePath: 'assets/images/gallery3.jpg',
     description: 'A collection of modern art pieces from renowned artists.',
   ),
 ];

@@ -529,7 +529,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     alignment: Alignment.center,
                     child: Container(
                       height: 1.5,
-                      width: 250,
+                      width: 200,
                       color: const Color.fromARGB(255, 89, 90, 90),
                     ),
                   ),
@@ -549,33 +549,90 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(
-                        'Chất liệu: ${currentArtwork!.material}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          height: 1,
-                          width: 400,
-                          color: const Color.fromARGB(255, 89, 90, 90),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Năm sáng tác: ${currentArtwork!.yearcreated}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          height: 1,
-                          width: 400,
-                          color: const Color.fromARGB(255, 89, 90, 90),
+
+                      // Sử dụng Stack và Positioned cho Text
+                      Container(
+                        height: 150, // Đặt chiều cao cố định cho Stack
+                        child: Stack(
+                          children: [
+                            // Text chất liệu
+                            Positioned(
+                              left: 20,
+                              top: 0,
+                              child: Text(
+                                'Chất liệu: ${currentArtwork!.material}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+
+                            // Đường kẻ đầu tiên
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              top: 25,
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  height: 1,
+                                  width: 350,
+                                  color: const Color.fromARGB(255, 89, 90, 90),
+                                ),
+                              ),
+                            ),
+
+                            // Text năm sáng tác
+                            Positioned(
+                              left: 20,
+                              top: 40,
+                              child: Text(
+                                'Năm sáng tác: ${currentArtwork!.yearcreated}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+
+                            // Đường kẻ thứ haiS
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              top: 65,
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  height: 1,
+                                  width: 350,
+                                  color: const Color.fromARGB(255, 89, 90, 90),
+                                ),
+                              ),
+                            ),
+                            // Text thể loại
+                            Positioned(
+                              left: 20,
+                              top: 80,
+                              child: Text(
+                                'Thể loại: ${currentArtwork!.category}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                            // Đường kẻ thứ ba
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              top: 105,
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  height: 1,
+                                  width: 350,
+                                  color: const Color.fromARGB(255, 89, 90, 90),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
