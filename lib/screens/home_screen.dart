@@ -1,6 +1,7 @@
 // lib/screens/home_screen.dart
 import 'package:app_ban_tranh/models/prodcut.dart';
 import 'package:app_ban_tranh/models/galleries.dart';
+import 'package:app_ban_tranh/screens/auction_screen.dart';
 import 'package:app_ban_tranh/screens/productpage_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/screens/galleriespage_screen.dart';
@@ -162,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-
+            const SizedBox(height: 36),
             // Danh mục tác phẩm mới
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -229,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   // Danh sách bảo tàng
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 70),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -389,6 +390,45 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ),
+                  const SizedBox(height: 70),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Đấu giá dành cho bạn',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AuctionScreen(),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text(
+                              'Xem thêm',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 21, 21, 21),
+                              ),
+                            ),
+                            Icon(Icons.arrow_forward_ios_outlined,
+                                size: 20,
+                                color: Color.fromARGB(255, 21, 21, 21)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),

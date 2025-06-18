@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -24,7 +25,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   // Danh sách giỏ hàng (có thể chuyển thành state management sau này)
   List<String> _cartItems = [];
-
+  final List<String> images = [
+    'assets/images/bh2.jpg',
+    'assets/images/bh2.jpg',
+    'assets/images/flowerstyle.jpg',
+    'assets/images/bh1.jpg',
+    'assets/images/flowerstyle.jpg',
+    'assets/images/bh1.jpg',
+    'assets/images/bh2.jpg',
+    'assets/images/flowerstyle.jpg',
+    'assets/images/bh2.jpg',
+    'assets/images/bh2.jpg',
+    'assets/images/flowerstyle.jpg',
+    'assets/images/bh1.jpg',
+  ];
   @override
   void initState() {
     super.initState();
@@ -633,6 +647,166 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 40),
+                  //staggered grid view Bộ sưu tập
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Bộ sưu tập nổi bật',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black.withOpacity(0.8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Horizontal StaggeredGridView - Same height, different widths
+                  SizedBox(
+                    height: 250,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: (images.length / 4)
+                          .ceil(), // Mỗi nhóm có 4 ảnh (2 hàng x 2 cột)
+                      itemBuilder: (context, groupIndex) {
+                        return Container(
+                          margin: const EdgeInsets.only(right: 12),
+                          child: Column(
+                            children: [
+                              // Hàng trên
+                              Row(
+                                children: [
+                                  // Ảnh ngắn
+                                  if (groupIndex * 4 < images.length)
+                                    Container(
+                                      width: 120, // Chiều rộng ngắn
+                                      height: 115, // Chiều cao cố định
+                                      margin: const EdgeInsets.only(
+                                          right: 8, bottom: 8),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.asset(
+                                          images[groupIndex * 4],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+
+                                  // Ảnh dài
+                                  if (groupIndex * 4 + 1 < images.length)
+                                    Container(
+                                      width: 180, // Chiều rộng dài
+                                      height: 115, // Chiều cao cố định
+                                      margin: const EdgeInsets.only(bottom: 8),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.asset(
+                                          images[groupIndex * 4 + 1],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+
+                              // Hàng dưới
+                              Row(
+                                children: [
+                                  // Ảnh dài
+                                  if (groupIndex * 4 + 2 < images.length)
+                                    Container(
+                                      width: 180, // Chiều rộng dài
+                                      height: 115, // Chiều cao cố định
+                                      margin: const EdgeInsets.only(right: 8),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.asset(
+                                          images[groupIndex * 4 + 2],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+
+                                  // Ảnh ngắn
+                                  if (groupIndex * 4 + 3 < images.length)
+                                    Container(
+                                      width: 120, // Chiều rộng ngắn
+                                      height: 115, // Chiều cao cố định
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.asset(
+                                          images[groupIndex * 4 + 3],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Tác phẩm liên quan',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black.withOpacity(0.8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
