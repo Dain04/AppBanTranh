@@ -1,5 +1,6 @@
 import 'package:app_ban_tranh/screens/auth/register_screen.dart';
 import 'package:app_ban_tranh/screens/main_screen.dart';
+import 'package:app_ban_tranh/screens/reset_passworrd_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -94,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     // ---------- Tiêu đề chào mừng ----------
                     const Text(
-                      'Welcome back to Museo',
+                      'Chào mừng trở lại Museo',
                       style: TextStyle(
                         color: Colors.grey,
                         fontSize: 16,
@@ -125,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter username'; // Xác thực không để trống
+                          return 'Vui lòng nhập tài khoản';
                         }
                         return null;
                       },
@@ -167,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter password';
+                          return 'Vui lòng nhập mật khẩu';
                         }
                         return null;
                       },
@@ -180,10 +181,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          // TODO: Điều hướng đến trang quên mật khẩu
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ResetPassworrdScreen()),
+                          );
                         },
                         child: const Text(
-                          'Forgot Password?',
+                          'Quên mật khẩu?',
                           style: TextStyle(
                             color: Colors.red,
                             decoration: TextDecoration.underline,
@@ -277,7 +282,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             const SizedBox(width: 12),
                             const Text(
-                              'Continue with Google',
+                              'Đăng nhập bằng Google',
                               style: TextStyle(
                                 color: Colors.black87,
                                 fontSize: 16,
@@ -294,7 +299,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // ---------- Liên kết đến trang đăng ký ----------
                     RichText(
                       text: TextSpan(
-                        text: "Don't have an account? ",
+                        text: "Bạn chưa có tài khoản? ",
                         style: const TextStyle(color: Colors.grey),
                         children: [
                           WidgetSpan(
@@ -311,7 +316,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   );
                                 },
                                 child: const Text(
-                                  'Register here',
+                                  'Đăng ký',
                                   style: TextStyle(
                                     color: Colors.red,
                                     decoration: TextDecoration.underline,
