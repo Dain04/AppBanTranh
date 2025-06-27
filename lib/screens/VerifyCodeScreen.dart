@@ -1,3 +1,4 @@
+import 'package:app_ban_tranh/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -111,9 +112,11 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                     ),
                     onPressed: () {
                       Navigator.of(context).pop(); // Đóng dialog
-                      Navigator.of(context).pop(); // Quay về màn hình trước
-                      // Hoặc chuyển đến màn hình đặt lại mật khẩu
-                      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ResetPasswordScreen()));
+                      //chuyển về lại login
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LoginScreen()));
                     },
                     child: const Text(
                       'Quay lại',

@@ -1,7 +1,6 @@
 import 'package:app_ban_tranh/screens/product_for_category_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;

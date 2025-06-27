@@ -97,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 5),
 
                     const Text(
-                      'Welcome to the Museo', // Phần giới thiệu
+                      'Chào mừng đến Museo',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.grey,
@@ -126,7 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter username';
+                          return 'Vui lòng điền username';
                         }
                         return null;
                       },
@@ -153,7 +153,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter email';
+                          return 'Vui lòng điền email';
                         }
                         return null;
                       },
@@ -194,7 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter password';
+                          return 'Vui lòng điền password';
                         }
                         return null;
                       },
@@ -221,7 +221,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           elevation: 0,
                         ),
                         child: const Text(
-                          'Register',
+                          'Đăng ký',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -239,7 +239,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            'OR',
+                            'Hoặc',
                             style: TextStyle(color: Colors.grey),
                           ),
                         ),
@@ -283,7 +283,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             const SizedBox(width: 12),
                             const Text(
-                              'Continue with Google',
+                              'Đăng nhập bằng Google',
                               style: TextStyle(
                                 color: Colors.black87,
                                 fontSize: 16,
@@ -300,7 +300,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     // ------------------- Link đến màn hình đăng nhập -------------------
                     RichText(
                       text: TextSpan(
-                        text: "Already have an account? ",
+                        text: "Bạn đã có tài khoản? ",
                         style: const TextStyle(color: Colors.grey),
                         children: [
                           WidgetSpan(
@@ -316,7 +316,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   );
                                 },
                                 child: const Text(
-                                  'Login here',
+                                  'Đăng nhập ở đây',
                                   style: TextStyle(
                                     color: Colors.red,
                                     decoration: TextDecoration.underline,

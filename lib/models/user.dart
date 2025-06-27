@@ -1,6 +1,6 @@
 class User {
   final String id;
-  final String name;
+  final String username;
   final String email;
   final String? profilePictureUrl;
   final String? phoneNumber;
@@ -15,7 +15,7 @@ class User {
 
   User({
     required this.id,
-    required this.name,
+    required this.username,
     required this.email,
     this.profilePictureUrl,
     this.phoneNumber,
@@ -32,7 +32,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
-      name: json['name'] as String,
+      username: json['name'] as String,
       email: json['email'] as String,
       profilePictureUrl: json['profilePictureUrl'] as String?,
     );
@@ -41,7 +41,7 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
+      'name': username,
       'email': email,
       'profilePictureUrl': profilePictureUrl,
     };
@@ -50,14 +50,14 @@ class User {
   //dữ liệu mẫu cho người dùng
   static User sampleUser = User(
     id: '1',
-    name: 'John Doe',
-    email: 'johndoe@example.com',
+    username: 'Thành Nghĩa',
+    email: 'lethanhnghia@gmail.com',
     profilePictureUrl: 'https://example.com/profile.jpg',
-    phoneNumber: '123-456-7890',
-    address1: '123 Main Street',
+    phoneNumber: '0337319225',
+    address1: 'Cần Giờ',
     address2: 'Apt 4B',
-    city: 'New York',
-    country: 'USA',
+    city: 'TP HCM',
+    country: 'Việt Nam',
     postalCode: '10001',
     state: 'NY',
     googleId: 'google123',

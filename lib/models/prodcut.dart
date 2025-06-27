@@ -137,3 +137,26 @@ final List<ArtworkItem> newArtworks = [
     material: '',
   ),
 ];
+//dữ liệu tác phẩm đấu giá
+final List<ArtworkItem> DauGiaTP = [
+  ArtworkItem(
+      id: '1',
+      title: 'Vạm Thiên',
+      artist: 'NghiaLT',
+      price: '129,000,000 VNĐ',
+      description: 'Tác phẩm nghệ thuật đương đại',
+      imagePath: 'assets/images/vam_thien.png',
+      material: 'Sơn dầu trên canvas',
+      category: 'Phong cảnh',
+      yearcreated: '2004'),
+  ArtworkItem(
+      id: '2',
+      title: 'Hoàng Hôn',
+      artist: 'TranABC',
+      price: '85,000,000 VNĐ',
+      description: 'Bức tranh phong cảnh tuyệt đẹp',
+      imagePath: 'assets/images/vam_thien.png',
+      material: 'Acrylic',
+      category: 'Phong cảnh',
+      yearcreated: '2010'),
+];

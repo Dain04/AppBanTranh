@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          'Welcome ${widget.username}!',
+                          'Chào mừng ${widget.username}!',
                           style: const TextStyle(
                             fontFamily: 'Courier',
                             fontSize: 20,
@@ -300,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(12),
                             child: Stack(
                               children: [
-                                // Hình ảnh bảo tàng - full height
+                                // Hình ảnh phòng trưng bày  - full height
                                 Container(
                                   height: double.infinity,
                                   width: double.infinity,
@@ -328,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 // Text overlay ở phía dưới
                                 Positioned(
-                                  bottom: 0,
+                                  bottom: 20,
                                   left: 0,
                                   right: 0,
                                   child: Padding(
@@ -371,9 +371,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 BorderRadius.circular(12),
                                           ),
                                           child: Text(
-                                            '${gallery.date_start} - ${gallery.date_end}',
+                                            'Ngày bắt đầu: ${gallery.date_start}\nNgày kết thúc: ${gallery.date_end}',
                                             style: const TextStyle(
-                                              fontSize: 11,
+                                              fontSize: 13,
                                               color: Colors.black87,
                                               fontWeight: FontWeight.w500,
                                             ),
@@ -428,7 +428,28 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 30),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Container(
+                      height: 380,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        itemCount: DauGiaTP.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            width: 270,
+                            margin: const EdgeInsets.only(right: 16.0),
+                            child: _buildAuctionArtworkCard(
+                              DauGiaTP[index],
+                              context,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -438,7 +459,133 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Widget _buildHomeArtworkCard
+  Widget _buildAuctionArtworkCard(
+    ArtworkItem artwork,
+    BuildContext context,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.orange.withOpacity(0.5), // Màu viền khác cho đấu giá
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.withOpacity(0.2), // Bóng màu cam
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Hiển thị hình ảnh với badge AUCTION
+          Padding(
+            padding:
+                const EdgeInsets.all(15.0), // Thêm padding xung quanh hình ảnh
+            child: Container(
+              height: 220,
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: AssetImage(artwork.imagePath),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  // Badge AUCTION
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        'ĐẤU GIÁ',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Nội dung bên dưới
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0, vertical: 10.0), // Padding cho nội dung
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        artwork.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(
+                          height: 4), // Tăng khoảng cách giữa các dòng text
+                      Text(
+                        'Nghệ sĩ: ${artwork.artist}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6), // Tăng khoảng cách trước giá
+                      Text(
+                        '${artwork.price}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: Colors.red, // Màu đỏ cho giá đấu giá
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Thêm padding bottom để tạo khoảng cách với viền dưới
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHomeArtworkCard(
     ArtworkItem artwork,
     BuildContext context,

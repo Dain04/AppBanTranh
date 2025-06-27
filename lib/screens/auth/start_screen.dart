@@ -46,7 +46,7 @@ class StartScreen extends StatelessWidget {
 
                   // App Title
                   const Text(
-                    'Welcome to Museo',
+                    'Chào mừng đến\nMuseo',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -57,7 +57,7 @@ class StartScreen extends StatelessWidget {
                   const SizedBox(height: 12),
 
                   const Text(
-                    'Discover and buy beautiful paintings',
+                    'Nơi khám phá và sỡ hữu nhũng vẻ đẹp',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
@@ -87,7 +87,7 @@ class StartScreen extends StatelessWidget {
                         );
                       },
                       child: const Text(
-                        'Login',
+                        'Đăng nhập',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),
@@ -115,7 +115,7 @@ class StartScreen extends StatelessWidget {
                         );
                       },
                       child: const Text(
-                        'Register',
+                        'Đăng ký',
                         style: TextStyle(
                           color: Colors.red,
                           fontSize: 16,
