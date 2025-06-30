@@ -8,7 +8,7 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cart'),
+        title: const Text('Order'),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -16,7 +16,7 @@ class CartScreen extends StatelessWidget {
       ),
       body: Center(
         child: Text(
-          'Cart Screen',
+          'Order Screen',
           style: TextStyle(fontSize: 24, color: Colors.black),
         ),
       ),

@@ -13,7 +13,7 @@ class ProductPageScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          'Back to Home',
+          'Trở lại trang chủ',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black,

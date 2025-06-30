@@ -1,8 +1,8 @@
 // lib/screens/main_screen.dart (hoặc navigation_screen.dart)
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
-import 'favorite_screen.dart';
-import 'cart_screen.dart';
+import 'Live_screen.dart';
+import 'order_screen.dart';
 import 'profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -42,19 +42,19 @@ class _MainScreenState extends State<MainScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Trang Chủ',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorite',
+            icon: Icon(Icons.videocam),
+            label: 'Trực Tiếp',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Cart',
+            icon: Icon(Icons.receipt_long),
+            label: 'Đơn Hàng',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Profile',
+            label: 'Cá Nhân',
           ),
         ],
         currentIndex: _selectedIndex,

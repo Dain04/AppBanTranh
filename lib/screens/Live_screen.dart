@@ -8,7 +8,7 @@ class SearchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favorite',
+        title: const Text('Live',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.black,
@@ -20,7 +20,7 @@ class SearchScreen extends StatelessWidget {
       ),
       body: Center(
         child: Text(
-          'Favorite Screen',
+          'Live Screen',
           style: TextStyle(fontSize: 24, color: Colors.black),
         ),
       ),
