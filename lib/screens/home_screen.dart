@@ -1,15 +1,18 @@
 // lib/screens/home_screen.dart
+import 'package:app_ban_tranh/models/live_artwork.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
 import 'package:app_ban_tranh/models/galleries.dart';
+import 'package:app_ban_tranh/screens/Live_screen.dart';
 import 'package:app_ban_tranh/screens/auction_screen.dart';
 import 'package:app_ban_tranh/screens/productpage_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/screens/galleriespage_screen.dart';
+import 'package:app_ban_tranh/models/user.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String username;
+  final User user;
 
-  const HomeScreen({Key? key, required this.username}) : super(key: key);
+  const HomeScreen({Key? key, required this.user}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -100,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          'Chào mừng ${widget.username}!',
+                          'Chào mừng ${widget.user.username}!',
                           style: const TextStyle(
                             fontFamily: 'Courier',
                             fontSize: 20,
@@ -428,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Container(
@@ -450,11 +453,201 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 70),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Phát sóng trực tiếp',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LiveScreen(),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text(
+                              'Xem thêm',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 21, 21, 21),
+                              ),
+                            ),
+                            Icon(Icons.arrow_forward_ios_outlined,
+                                size: 20,
+                                color: Color.fromARGB(255, 21, 21, 21)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 0),
+                    child: Container(
+                      height: 340,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        itemCount: artworklive.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            width: 340,
+                            margin: const EdgeInsets.only(right: 19.0),
+                            child: _buildLiveArtworkCard(
+                              artworklive[index],
+                              context,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildLiveArtworkCard(
+    ArtworkLive artwork,
+    BuildContext context,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color.fromARGB(255, 92, 91, 89).withOpacity(0.5),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromARGB(255, 71, 71, 71)
+                .withOpacity(0.2), // Bóng màu cam
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding:
+                const EdgeInsets.all(5.0), // Thêm padding xung quanh hình ảnh
+            child: Container(
+              height: 220,
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: AssetImage(artwork.imagePath),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 15,
+                    right: 15,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 244, 244, 244),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '● ',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'LIVE',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Nội dung bên dưới
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12.0, vertical: 10.0), // Padding cho nội dung
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${artwork.nameartlive}: ${artwork.description}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Trực tiếp ${artwork.date_start} \nVào lúc ${artwork.time_start} kết thúc ${artwork.time_end}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: Color.fromARGB(
+                              255, 121, 119, 118), // Màu đỏ cho giá đấu giá
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Thêm padding bottom để tạo khoảng cách với viền dưới
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }

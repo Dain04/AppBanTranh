@@ -4,6 +4,9 @@ import 'home_screen.dart';
 import 'Live_screen.dart';
 import 'order_screen.dart';
 import 'profile_screen.dart';
+import 'package:app_ban_tranh/models/user.dart';
+
+final User currentUser = User.sampleUser;
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -17,11 +20,9 @@ class _MainScreenState extends State<MainScreen> {
 
   // Add all screens to the list
   final List<Widget> _screens = [
-    const HomeScreen(
-      username: '',
-    ),
-    const SearchScreen(),
-    const CartScreen(),
+    HomeScreen(user: currentUser),
+    const LiveScreen(),
+    const OrderScreen(),
     const ProfileScreen(),
   ];
 

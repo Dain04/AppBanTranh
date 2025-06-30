@@ -1,4 +1,5 @@
 import 'package:app_ban_tranh/models/prodcut.dart';
+import 'package:app_ban_tranh/screens/user_info_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/user.dart';
 
@@ -136,7 +137,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ),
                 // Icon cài đặt
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const UserInfoScreen(),
+                      ),
+                    );
+                  },
                   icon: const Icon(Icons.settings, color: Colors.grey),
                 ),
               ],
