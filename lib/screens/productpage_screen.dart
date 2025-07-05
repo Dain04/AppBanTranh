@@ -265,9 +265,9 @@ Widget _buildArtworkCard(BuildContext context, ArtworkItem artwork) {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'View detail',
+                              'Xem chi tiết',
                               style: TextStyle(
-                                fontSize: 9,
+                                fontSize: 10,
                                 color: Colors.black,
                               ),
                             ),

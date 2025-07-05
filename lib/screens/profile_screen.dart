@@ -155,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             color: Colors.white,
             child: TabBar(
               tabs: const [
-                Tab(text: 'Bộ sưu tập của tôi'),
+                Tab(text: 'Giỏ hàng của tôi'),
                 Tab(text: 'Mục yêu thích của tôi'),
               ],
               controller: _tabController,
@@ -174,8 +174,8 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                // Tab 1: Bộ sưu tập của tôi
-                _buildCollectionTab(),
+                // Tab 1: Giỏ hàng của tôi
+                _buildCartTab(),
                 // Tab 2: Mục yêu thích của tôi
                 _buildFavoritesTab(),
               ],
@@ -186,8 +186,8 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  // Widget cho tab "Bộ sưu tập của tôi"
-  Widget _buildCollectionTab() {
+  // Widget cho tab "Giỏ hàng của tôi"
+  Widget _buildCartTab() {
     if (_collectionItems.isEmpty) {
       return const Center(
         child: Column(
@@ -200,7 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
             SizedBox(height: 16),
             Text(
-              'Bộ sưu tập trống',
+              'Giỏ hàng trống',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
@@ -208,7 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
             SizedBox(height: 8),
             Text(
-              'Hãy thêm tác phẩm vào bộ sưu tập!',
+              'Hãy xem và thêm tác phẩm vào giỏ hàng!',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
@@ -401,7 +401,7 @@ Widget _buildArtworkCard(
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        // Nút xóa khỏi bộ sưu tập (chỉ hiển thị trong tab bộ sưu tập)
+                        // Nút xóa khỏi cart
                         if (showDeleteButton)
                           GestureDetector(
                             onTap: () => removeFromCollection(artwork.id),

@@ -177,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Tác phẩm mới cho bạn',
+                        'Tác Phẩm Mới Cho Bạn',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -238,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Bảo tàng ở gần bạn',
+                        'Phòng Trưng Bày',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -398,7 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Đấu giá dành cho bạn',
+                        'Đấu Giá Dành Cho Bạn',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -458,7 +458,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Phát sóng trực tiếp',
+                        'Phát Sóng Trực Tiếp',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -495,7 +495,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 0),
                     child: Container(
-                      height: 340,
+                      height: 360,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -630,7 +630,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Trực tiếp ${artwork.date_start} \nVào lúc ${artwork.time_start} kết thúc ${artwork.time_end}',
+                        'Trực tiếp: ${artwork.date_start} \nVào lúc: ${artwork.time_start} \nKết thúc: ${artwork.time_end}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,

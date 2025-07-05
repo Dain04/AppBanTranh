@@ -1,4 +1,5 @@
 import 'package:app_ban_tranh/screens/product_for_category_screen.dart';
+import 'package:app_ban_tranh/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
 
@@ -199,7 +200,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 IconButton(
                   icon: const Icon(Icons.shopping_bag_outlined, size: 30),
                   onPressed: () {
-                    Navigator.pushNamed(context, '/cart');
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ProfileScreen()));
                   },
                 ),
                 // Badge hiển thị số lượng items trong cart
