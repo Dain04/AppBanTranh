@@ -37,13 +37,6 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     }
   }
 
-  void _onBackspace(int index) {
-    if (index > 0) {
-      _controllers[index - 1].clear();
-      _focusNodes[index - 1].requestFocus();
-    }
-  }
-
   String getVerificationCode() {
     return _controllers.map((controller) => controller.text).join();
   }

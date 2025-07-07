@@ -1,7 +1,6 @@
 import 'package:app_ban_tranh/models/prodcut.dart';
 import 'package:app_ban_tranh/screens/user_info_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:app_ban_tranh/models/user.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

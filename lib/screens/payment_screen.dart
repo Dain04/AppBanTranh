@@ -1,6 +1,6 @@
 import 'package:app_ban_tranh/models/order.dart';
 import 'package:app_ban_tranh/screens/PaymentProgressCurve.dart';
-import 'package:app_ban_tranh/screens/home_screen.dart';
+import 'package:app_ban_tranh/screens/order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -340,9 +340,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
               const SizedBox(width: 12),
               Image.asset(
-                'assets/images/mastercard.png',
-                width: 40,
-                height: 25,
+                'assets/images/mc.png',
+                width: 50,
+                height: 40,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     width: 40,
@@ -811,8 +811,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              HomeScreen(user: widget.customerInfo['name']),
+                          builder: (context) => OrderScreen(),
                         ),
                       );
                     },
