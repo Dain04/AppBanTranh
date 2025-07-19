@@ -263,33 +263,59 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   // Hình ảnh sản phẩm
                   Center(
-                    child: Container(
-                      width: 250,
-                      height: 300,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: PageView.builder(
-                        controller: pageController,
-                        onPageChanged: (index) {
-                          setState(() {
-                            selectedImageIndex = index;
-                          });
-                        },
-                        itemCount: currentArtwork!.allImages.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              image: DecorationImage(
-                                image: AssetImage(
-                                    currentArtwork!.allImages[index]),
-                                fit: BoxFit.cover,
-                              ),
+                    child: Stack(
+                      alignment:
+                          Alignment.center, // Căn giữa các phần tử trong Stack
+                      children: [
+                        // Ảnh nền - nằm dưới cùng
+                        Container(
+                          width: 330,
+                          height: 430,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage('assets/images/khunggo.png'),
+                              fit: BoxFit.cover,
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        ),
+
+                        // Container chứa PageView - nằm trên ảnh nền
+                        Container(
+                          width: 260,
+                          height: 360,
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                          child: PageView.builder(
+                            controller: pageController,
+                            onPageChanged: (index) {
+                              setState(() {
+                                selectedImageIndex = index;
+                              });
+                            },
+                            itemCount: currentArtwork!.allImages.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  image: DecorationImage(
+                                    image: AssetImage(
+                                        currentArtwork!.allImages[index]),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 20),
