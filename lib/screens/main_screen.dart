@@ -1,4 +1,5 @@
 // lib/screens/main_screen.dart (hoặc navigation_screen.dart)
+import 'package:app_ban_tranh/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'Live_screen.dart';
@@ -21,8 +22,8 @@ class _MainScreenState extends State<MainScreen> {
   // Add all screens to the list
   final List<Widget> _screens = [
     HomeScreen(user: currentUser),
-    const LiveScreen(),
-    const OrderScreen(),
+    const CartScreen(),
+    UserOrderScreen(userId: currentUser.id),
     const ProfileScreen(),
   ];
 
@@ -46,8 +47,8 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Trang Chủ',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.videocam),
-            label: 'Trực Tiếp',
+            icon: Icon(Icons.shopping_cart),
+            label: 'Giỏ hàng',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long),

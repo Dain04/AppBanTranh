@@ -5,7 +5,10 @@ import 'package:app_ban_tranh/screens/payment_screen.dart';
 import 'package:flutter/material.dart';
 
 class InfoPaymentScreen extends StatefulWidget {
-  const InfoPaymentScreen({Key? key}) : super(key: key);
+  final List<OrderItem>? orderItems; // Thêm parameter để nhận danh sách items
+
+  const InfoPaymentScreen({Key? key, this.orderItems}) : super(key: key);
+
   @override
   State<InfoPaymentScreen> createState() => _PaymentScreenState();
 }
@@ -19,24 +22,29 @@ class _PaymentScreenState extends State<InfoPaymentScreen> {
   final _namecityController = TextEditingController();
   final _addressController = TextEditingController();
 
-  String selectedCountry = 'Việt Nam';
-  String selectedCity = 'Hồ Chí Minh';
+  String selectedCountry = 'Việt Nam';
+  String selectedCity = 'Hồ Chí Minh';
   bool saveInfo = false;
 
   final List<String> countries = [
-    'Việt Nam',
-    'Thái Lan',
+    'Việt Nam',
+    'Thái Lan',
     'Singapore',
     'USA',
-    'Khác'
+    'Khác'
   ];
   final List<String> cities = [
-    'Hồ Chí Minh',
-    'Hà Nội',
-    'Đà Nẵng',
-    'Cần Thơ',
-    'Khác'
+    'Hồ Chí Minh',
+    'Hà Nội',
+    'Đà Nẵng',
+    'Cần Thơ',
+    'Khác'
   ];
+
+  // Lấy danh sách items từ parameter hoặc sử dụng sample data
+  List<OrderItem> get currentOrderItems {
+    return widget.orderItems ?? OrderData.sampleOrders[0].items;
+  }
 
   @override
   void dispose() {
@@ -70,10 +78,13 @@ class _PaymentScreenState extends State<InfoPaymentScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: _buildArtworkCard(context, orderArtworkItems[0]),
-              ),
+              // Hiển thị danh sách các artwork items
+              ...currentOrderItems
+                  .map((item) => Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: _buildArtworkCard(context, item),
+                      ))
+                  .toList(),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -102,7 +113,7 @@ class _PaymentScreenState extends State<InfoPaymentScreen> {
 
               const SizedBox(height: 30),
 
-              // hành động
+              // hành động
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: _buildActionButtons(),
@@ -428,19 +439,19 @@ class _PaymentScreenState extends State<InfoPaymentScreen> {
       'saveInfo': saveInfo,
     };
 
-    // Chuyển đến PaymentScreen
+    // Chuyển đến PaymentScreen với danh sách OrderItem
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PaymentScreen(
           customerInfo: customerInfo,
-          orderItems: orderArtworkItems,
+          orderItems: currentOrderItems,
         ),
       ),
     );
   }
 
-  Widget _buildArtworkCard(BuildContext context, OrderArtworkItem item) {
+  Widget _buildArtworkCard(BuildContext context, OrderItem item) {
     return Container(
       decoration: BoxDecoration(
           color: Colors.white,
@@ -504,7 +515,7 @@ class _PaymentScreenState extends State<InfoPaymentScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.title,
+                    item.paintingName,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -520,29 +531,67 @@ class _PaymentScreenState extends State<InfoPaymentScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
+                  if (item.yearCreated != null)
+                    Text(
+                      'Năm: ${item.yearCreated}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  if (item.material != null)
+                    Text(
+                      item.material!,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  const SizedBox(height: 4),
                   Text(
-                    'Năm: ${item.yearcreated ?? 'N/A'}',
+                    'Kích thước: ${item.size}',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[500],
                     ),
                   ),
                   Text(
-                    item.material ?? 'N/A',
+                    'Khung: ${item.frame}',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[500],
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    '${_formatPrice(item.price)} VNĐ',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        '${_formatPrice(item.price.toInt())} VNĐ',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'x${item.quantity}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
                   ),
+                  if (item.hasDiscount)
+                    Text(
+                      'Giá gốc: ${_formatPrice(item.originalPrice.toInt())} VNĐ',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -552,9 +601,8 @@ class _PaymentScreenState extends State<InfoPaymentScreen> {
     );
   }
 
-  String _formatPrice(String price) {
-    final numPrice = int.tryParse(price) ?? 0;
-    return numPrice.toString().replaceAllMapped(
+  String _formatPrice(int price) {
+    return price.toString().replaceAllMapped(
           RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
           (Match m) => '${m[1]}.',
         );

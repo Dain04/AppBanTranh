@@ -1,12 +1,13 @@
 import 'package:app_ban_tranh/models/order.dart';
 import 'package:app_ban_tranh/screens/PaymentProgressCurve.dart';
+import 'package:app_ban_tranh/screens/cart_screen.dart';
 import 'package:app_ban_tranh/screens/order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PaymentScreen extends StatefulWidget {
   final Map<String, dynamic> customerInfo;
-  final List<OrderArtworkItem> orderItems;
+  final List<OrderItem> orderItems;
 
   const PaymentScreen({
     Key? key,
@@ -91,7 +92,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     );
   }
 
-  Widget _buildArtworkCard(BuildContext context, OrderArtworkItem item) {
+  Widget _buildArtworkCard(BuildContext context, OrderItem item) {
     return Container(
       decoration: BoxDecoration(
           color: Colors.white,
@@ -155,7 +156,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.title,
+                    item.paintingName, // Sửa từ item.title thành item.paintingName
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -172,7 +173,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Năm: ${item.yearcreated ?? '1867'}',
+                    'Năm: ${item.yearCreated ?? '1867'}', // Sửa từ item.yearcreated thành item.yearCreated
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[500],
@@ -180,7 +181,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${_formatPrice(item.price)} VNĐ',
+                    '${_formatPrice(item.price.toString())} VNĐ', // Chuyển đổi double thành String
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -318,7 +319,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 child: TextField(
                   controller: _numberCardController,
                   decoration: InputDecoration(
-                    hintText: '1234 5678 9012 3456',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -458,7 +458,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           TextField(
             controller: _cardHolderNameController,
             decoration: InputDecoration(
-              hintText: 'Nguyễn Văn A',
+              hintText: 'Nguyễn Văn A',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Colors.grey[300]!),
@@ -499,7 +499,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget _buildOrderSummarySection() {
     final item = widget.orderItems[0];
     const deliveryFee = 1000000;
-    final price = int.tryParse(item.price) ?? 0;
+    final price = item.price.toInt(); // Chuyển từ double sang int
     final subtotal = price + deliveryFee;
     final tax = (subtotal * 0.05).round();
     final total = subtotal + tax;
@@ -514,11 +514,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //Thông tin đơn hàng
+          //Thông tin đơn hàng
           Align(
             alignment: Alignment.center,
             child: Text(
-              item.title,
+              item.paintingName, // Sửa từ item.title thành item.paintingName
               style: const TextStyle(
                 fontSize: 25,
                 fontWeight: FontWeight.w900,
@@ -582,7 +582,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               isTotal: true),
           _buildSummaryRow('Phương thức thanh toán:', 'Visa Card'),
           Text(
-            '*Việc mua hàng của bạn sẽ được bảo vệ',
+            '*Việc mua hàng của bạn sẽ được bảo vệ',
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey[600],
@@ -811,7 +811,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => OrderScreen(),
+                          builder: (context) => CartScreen(),
                         ),
                       );
                     },
