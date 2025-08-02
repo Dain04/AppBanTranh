@@ -1,3 +1,4 @@
+import 'package:app_ban_tranh/repositories/user_repository.dart';
 import 'package:app_ban_tranh/screens/auth/register_screen.dart';
 import 'package:app_ban_tranh/screens/main_screen.dart';
 import 'package:app_ban_tranh/screens/reset_passworrd_screen.dart';
@@ -339,21 +340,54 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Xử lý đăng nhập thường
-  void _handleLogin() {
-    print('Username: ${_usernameController.text}');
-    print('Password: ${_passwordController.text}');
+void _handleLogin() async {
+  // Hiển thị loading
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => const Center(
+      child: CircularProgressIndicator(),
+    ),
+  );
 
-    // TODO: Triển khai logic đăng nhập
-    // - Gọi API xác thực
-    // - Hiển thị loading
-    // - Điều hướng khi thành công hoặc báo lỗi khi thất bại
+  try {
+    final userRepository = UserRepository();
+    final result = await userRepository.login(
+      emailOrUsername: _usernameController.text.trim(),
+      password: _passwordController.text,
+    );
 
-    //GIẢ LẬP LOGIN THÀNH CÔNG VÀ CHUYỂN HƯỚNG TỚI HOME SCREEN
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const MainScreen()),
+    // Đóng loading
+    Navigator.of(context).pop();
+
+    if (result['success']) {
+      // Đăng nhập thành công
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+    } else {
+      // Hiển thị lỗi
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message']),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } catch (e) {
+    // Đóng loading
+    Navigator.of(context).pop();
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Lỗi: ${e.toString()}'),
+        backgroundColor: Colors.red,
+      ),
     );
   }
+}
+
 
   // Xử lý đăng nhập bằng Google
   void _handleGoogleLogin() {

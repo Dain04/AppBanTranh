@@ -1,9 +1,17 @@
 import 'package:app_ban_tranh/models/prodcut.dart';
+import 'package:app_ban_tranh/models/user.dart';
 import 'package:app_ban_tranh/screens/user_info_screen.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final User user;
+  final VoidCallback? onUserUpdated;
+
+  const ProfileScreen({
+    Key? key,
+    required this.user,
+    this.onUserUpdated,
+  }) : super(key: key);
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -116,16 +124,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Lê Thành Nghĩa',
-                        style: TextStyle(
+                      Text(
+                        widget.user.username,
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Đã tham gia từ 2025',
+                        'Email: ${widget.user.email}',
                         style: TextStyle(
                           color: Colors.blue[600],
                           fontSize: 14,
@@ -140,9 +148,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const UserInfoScreen(),
+                        builder: (context) => UserInfoScreen(
+                          user: widget.user,
+                        ),
                       ),
-                    );
+                    ).then((_) {
+                      // Refresh data khi quay lại
+                      if (widget.onUserUpdated != null) {
+                        widget.onUserUpdated!();
+                      }
+                    });
                   },
                   icon: const Icon(Icons.settings, color: Colors.grey),
                 ),
@@ -154,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             color: Colors.white,
             child: TabBar(
               tabs: const [
-                Tab(text: 'Giỏ hàng của tôi'),
+                Tab(text: 'Giỏ hàng của tôi'),
                 Tab(text: 'Mục yêu thích của tôi'),
               ],
               controller: _tabController,
@@ -173,7 +188,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                // Tab 1: Giỏ hàng của tôi
+                // Tab 1: Giỏ hàng của tôi
                 _buildCartTab(),
                 // Tab 2: Mục yêu thích của tôi
                 _buildFavoritesTab(),
@@ -185,7 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  // Widget cho tab "Giỏ hàng của tôi"
+  // Widget cho tab "Giỏ hàng của tôi"
   Widget _buildCartTab() {
     if (_collectionItems.isEmpty) {
       return const Center(
@@ -199,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
             SizedBox(height: 16),
             Text(
-              'Giỏ hàng trống',
+              'Giỏ hàng trống',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey,
@@ -207,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
             SizedBox(height: 8),
             Text(
-              'Hãy xem và thêm tác phẩm vào giỏ hàng!',
+              'Hãy xem và thêm tác phẩm vào giỏ hàng!',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
@@ -456,3 +471,4 @@ Widget _buildArtworkCard(
     ),
   );
 }
+

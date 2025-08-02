@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          'Chào mừng ${widget.user.username}!',
+                          'Chào mừng ${widget.user.username}!',
                           style: const TextStyle(
                             fontFamily: 'Courier',
                             fontSize: 20,
@@ -239,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Phòng Trưng Bày',
+                        'Phòng Trưng Bày',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -304,7 +304,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(12),
                             child: Stack(
                               children: [
-                                // Hình ảnh phòng trưng bày  - full height
+                                // Hình ảnh phòng trưng bày  - full height
                                 Container(
                                   height: double.infinity,
                                   width: double.infinity,
@@ -375,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 BorderRadius.circular(12),
                                           ),
                                           child: Text(
-                                            'Ngày bắt đầu: ${gallery.date_start}\nNgày kết thúc: ${gallery.date_end}',
+                                            'Ngày bắt đầu: ${gallery.date_start}\nNgày kết thúc: ${gallery.date_end}',
                                             style: const TextStyle(
                                               fontSize: 13,
                                               color: Colors.black87,
@@ -399,7 +399,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Đấu Giá Dành Cho Bạn',
+                        'Đấu Giá Dành Cho Bạn',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -459,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
-                        'Phát Sóng Trực Tiếp',
+                        'Phát Sóng Trực Tiếp',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -827,7 +827,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Trực tiếp: ${artwork.date_start} \nVào lúc: ${artwork.time_start} \nKết thúc: ${artwork.time_end}',
+                        'Trực tiếp: ${artwork.date_start} \nVào lúc: ${artwork.time_start} \nKết thúc: ${artwork.time_end}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -986,12 +986,12 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        //theem viền
+        //theem viền
         border: Border.all(
           color: Colors.grey.withOpacity(0.3),
           width: 1.5,
         ),
-        // tạo độ bóng
+        // tạo độ bóng
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.3),

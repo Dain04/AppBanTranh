@@ -1,5 +1,6 @@
+// lib/screens/productdetail_screen.dart
 import 'package:app_ban_tranh/screens/product_for_category_screen.dart';
-import 'package:app_ban_tranh/screens/profile_screen.dart';
+import 'package:app_ban_tranh/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
 
@@ -23,7 +24,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   // Danh sách ID tác phẩm yêu thích
   List<String> _favoriteIds = [];
-// Hàm lấy danh sách tác phẩm tương tự (cùng category)
+
+  // Hàm lấy danh sách tác phẩm tương tự (cùng category)
   List<ArtworkItem> _getSimilarArtworks() {
     if (currentArtwork == null) return [];
 
@@ -43,6 +45,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   // Danh sách giỏ hàng (có thể chuyển thành state management sau này)
   List<String> _cartItems = [];
+  
   final List<String> images = [
     'assets/images/bh2.jpg',
     'assets/images/bh2.jpg',
@@ -57,6 +60,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     'assets/images/flowerstyle.jpg',
     'assets/images/bh1.jpg',
   ];
+
   @override
   void initState() {
     super.initState();
@@ -192,7 +196,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               },
             ),
           ),
-          // Icon cart
+          // Icon cart - ĐÃ SỬA: Chuyển đến CartScreen
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: Stack(
@@ -201,9 +205,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   icon: const Icon(Icons.shopping_bag_outlined, size: 30),
                   onPressed: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ProfileScreen()));
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CartScreen(),
+                      ),
+                    );
                   },
                 ),
                 // Badge hiển thị số lượng items trong cart
@@ -264,14 +270,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   // Hình ảnh sản phẩm
                   Center(
                     child: Stack(
-                      alignment:
-                          Alignment.center, // Căn giữa các phần tử trong Stack
+                      alignment: Alignment.center,
                       children: [
                         // Ảnh nền - nằm dưới cùng
                         Container(
                           width: 330,
                           height: 430,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             image: DecorationImage(
                               image: AssetImage('assets/images/khunggo.png'),
                               fit: BoxFit.cover,
@@ -323,7 +328,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   // Slider ảnh nhỏ
                   if (currentArtwork!.allImages.length > 1)
                     Center(
-                      child: Container(
+                      child: SizedBox(
                         height: 80,
                         width: double.infinity,
                         child: currentArtwork!.allImages.length <= 4
@@ -501,7 +506,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       // Nút favorite
                       Expanded(
                         flex: 1,
-                        child: Container(
+                        child: SizedBox(
                           height: 50,
                           child: OutlinedButton(
                             onPressed: () {
@@ -566,7 +571,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 40),
-                  // dòng kẻ
+
+                  // Dòng kẻ
                   Align(
                     alignment: Alignment.center,
                     child: Container(
@@ -576,8 +582,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
+
                   Text(
-                    '"' + currentArtwork!.description + '"',
+                    '"${currentArtwork!.description}"',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 18,
@@ -585,7 +592,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // dòng kẻ
+
+                  // Dòng kẻ
                   Align(
                     alignment: Alignment.center,
                     child: Container(
@@ -595,6 +603,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 40),
+
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -612,8 +621,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       const SizedBox(height: 10),
 
                       // Sử dụng Stack và Positioned cho Text
-                      Container(
-                        height: 150, // Đặt chiều cao cố định cho Stack
+                      SizedBox(
+                        height: 150,
                         child: Stack(
                           children: [
                             // Text chất liệu
@@ -651,7 +660,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                             ),
 
-                            // Đường kẻ thứ haiS
+                            // Đường kẻ thứ hai
                             Positioned(
                               left: 0,
                               right: 0,
@@ -665,6 +674,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 ),
                               ),
                             ),
+
                             // Text thể loại
                             Positioned(
                               left: 20,
@@ -674,6 +684,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 style: const TextStyle(fontSize: 16),
                               ),
                             ),
+
                             // Đường kẻ thứ ba
                             Positioned(
                               left: 0,
@@ -694,7 +705,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 40),
-                  //staggered grid view Bộ sưu tập
+
+                  // Staggered grid view Bộ sưu tập
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -714,8 +726,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: (images.length / 4)
-                          .ceil(), // Mỗi nhóm có 4 ảnh (2 hàng x 2 cột)
+                      itemCount: (images.length / 4).ceil(),
                       itemBuilder: (context, groupIndex) {
                         return Container(
                           margin: const EdgeInsets.only(right: 12),
@@ -727,8 +738,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   // Ảnh ngắn
                                   if (groupIndex * 4 < images.length)
                                     Container(
-                                      width: 120, // Chiều rộng ngắn
-                                      height: 115, // Chiều cao cố định
+                                      width: 120,
+                                      height: 115,
                                       margin: const EdgeInsets.only(
                                           right: 8, bottom: 8),
                                       decoration: BoxDecoration(
@@ -754,8 +765,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   // Ảnh dài
                                   if (groupIndex * 4 + 1 < images.length)
                                     Container(
-                                      width: 180, // Chiều rộng dài
-                                      height: 115, // Chiều cao cố định
+                                      width: 180,
+                                      height: 115,
                                       margin: const EdgeInsets.only(bottom: 8),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
@@ -785,8 +796,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   // Ảnh dài
                                   if (groupIndex * 4 + 2 < images.length)
                                     Container(
-                                      width: 180, // Chiều rộng dài
-                                      height: 115, // Chiều cao cố định
+                                      width: 180,
+                                      height: 115,
                                       margin: const EdgeInsets.only(right: 8),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
@@ -811,8 +822,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   // Ảnh ngắn
                                   if (groupIndex * 4 + 3 < images.length)
                                     Container(
-                                      width: 120, // Chiều rộng ngắn
-                                      height: 115, // Chiều cao cố định
+                                      width: 120,
+                                      height: 115,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
                                         boxShadow: [
@@ -840,23 +851,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       },
                     ),
                   ),
+
                   Align(
                     alignment: Alignment.center,
                     child: TextButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/collection');
                       },
-                      child: Row(
+                      child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            'Xem thêm bộ sưu tập',
+                          Text(
+                            'Xem thêm bộ sưu tập',
                             style: TextStyle(
                               fontSize: 16,
                               color: Color.fromARGB(255, 107, 108, 109),
                             ),
                           ),
-                          const Icon(
+                          Icon(
                             Icons.arrow_forward,
                             color: Color.fromARGB(255, 107, 108, 109),
                           ),
@@ -865,9 +877,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 1),
-                  // dòng kẻ
+
+                  // Dòng kẻ
                   Transform.translate(
-                    offset: const Offset(0, -10), // Đẩy lên trên 10px
+                    offset: const Offset(0, -10),
                     child: Align(
                       alignment: Alignment.center,
                       child: Container(
@@ -876,107 +889,63 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         color: const Color.fromARGB(255, 89, 90, 90),
                       ),
                     ),
+                  
                   ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Tác phẩm tương tự',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductForCategoryScreen(
-                                categoryName: currentArtwork?.category ?? '',
-                              ),
-                            ),
-                          );
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Text(
-                              'Xem thêm',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 21, 21, 21),
-                              ),
-                            ),
-                            Icon(Icons.arrow_forward_ios_outlined,
-                                size: 20,
-                                color: Color.fromARGB(255, 21, 21, 21)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  // Danh sách tác phẩm tương tự (cùng category)
-                  Builder(
-                    builder: (context) {
-                      final similarArtworks = _getSimilarArtworks();
+                  const SizedBox(height: 30),
 
-                      if (similarArtworks.isEmpty) {
-                        return Container(
-                          height: 100,
-                          child: Center(
-                            child: Text(
-                              'Không có tác phẩm tương tự',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-
-                      return Container(
-                        height: 310,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          itemCount: similarArtworks.length,
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: () {
-                                // Điều hướng đến trang chi tiết của sản phẩm được chọn
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ProductDetailScreen(
-                                      productId: similarArtworks[index].id,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                width: 270,
-                                margin: const EdgeInsets.only(right: 16.0),
-                                child: _buildSimilarProduct(
-                                  similarArtworks[index],
-                                  context,
-                                  _isFavorite,
-                                  _toggleFavorite,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
+                  // Sản phẩm tương tự
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Sản phẩm tương tự',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black.withOpacity(0.8),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
+
+                  // Grid sản phẩm tương tự
+                  _buildSimilarProducts(),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
+    );
+  }
+
+  // Widget hiển thị sản phẩm tương tự
+  Widget _buildSimilarProducts() {
+    List<ArtworkItem> similarArtworks = _getSimilarArtworks();
+
+    if (similarArtworks.isEmpty) {
+      return const Center(
+        child: Text(
+          'Không có sản phẩm tương tự',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.75,
+      ),
+      itemCount: similarArtworks.length > 6 ? 6 : similarArtworks.length,
+      itemBuilder: (context, index) {
+        final artwork = similarArtworks[index];
+        return _buildSimilarProduct(artwork);
+      },
     );
   }
 
@@ -988,111 +957,110 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 }
 
-Widget _buildSimilarProduct(
-  ArtworkItem artwork,
-  BuildContext context,
-  bool Function(String) isFavorite,
-  void Function(String) toggleFavorite,
-) {
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(
-        color: Colors.grey.withOpacity(0.3),
-        width: 1.5,
-      ),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.3),
-          blurRadius: 12,
-          offset: const Offset(0, 4),
-          spreadRadius: 2,
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Stack để thêm nút favorite trên hình ảnh
-        Stack(
-          children: [
-            // Hình ảnh tác phẩm
-            Container(
-              height: 180,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-                image: DecorationImage(
-                  image: AssetImage(artwork.imagePath),
-                  fit: BoxFit.cover,
-                ),
+// Widget cho từng sản phẩm tương tự
+Widget _buildSimilarProduct(ArtworkItem artwork) {
+  return Builder(
+    builder: (context) {
+      return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailScreen(
+                productId: artwork.id,
               ),
             ),
-          ],
-        ),
-
-        // Nội dung bên dưới hình ảnh
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Thông tin tác phẩm
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      artwork.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Hình ảnh sản phẩm
+              Expanded(
+                flex: 3,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      artwork.artist,
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    image: DecorationImage(
+                      image: AssetImage(artwork.imagePath),
+                      fit: BoxFit.cover,
                     ),
-
-                    const SizedBox(height: 4),
-                    Text(
-                      'Thể loại: ${artwork.category ?? 'Unknown'}',
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-
-                    const SizedBox(height: 8),
-                    // Hiển thị giá
-                    Text(
-                      artwork.price,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+              
+              // Thông tin sản phẩm
+              Expanded(
+                flex: 2,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Tên sản phẩm
+                      Text(
+                        artwork.title,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      
+                      // Tác giả
+                      Text(
+                        'Tác giả: ${artwork.artist}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      
+                      // Giá
+                      Text(
+                        artwork.price,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ],
-    ),
+      );
+    },
   );
 }

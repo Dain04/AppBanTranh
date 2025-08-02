@@ -1,14 +1,13 @@
-// lib/screens/main_screen.dart (hoặc navigation_screen.dart)
-import 'package:app_ban_tranh/screens/cart_screen.dart';
+// lib/screens/main_screen.dart
+import 'package:app_ban_tranh/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:app_ban_tranh/screens/cart_screen.dart';
+import 'package:app_ban_tranh/repositories/user_repository.dart';
+import 'package:app_ban_tranh/models/user.dart';
 import 'home_screen.dart';
 import 'Live_screen.dart';
 import 'order_screen.dart';
 import 'profile_screen.dart';
-import 'package:app_ban_tranh/models/user.dart';
-
-final User currentUser = User.sampleUser;
-
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
@@ -18,14 +17,63 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  User? _currentUser;
+  bool _isLoading = true;
+  final UserRepository _userRepository = UserRepository();
 
-  // Add all screens to the list
-  final List<Widget> _screens = [
-    HomeScreen(user: currentUser),
-    const CartScreen(),
-    UserOrderScreen(userId: currentUser.id),
-    const ProfileScreen(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUser();
+  }
+
+  /// Tải thông tin user hiện tại
+  Future<void> _loadCurrentUser() async {
+    try {
+      final user = await _userRepository.getCurrentUser();
+      
+      if (user == null) {
+        // Nếu không có user đăng nhập, chuyển về login
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        }
+        return;
+      }
+      
+      setState(() {
+        _currentUser = user;
+        _isLoading = false;
+      });
+      
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      
+      // Hiển thị lỗi và chuyển về login
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi tải thông tin user: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
+    }
+  }
+
+  /// Refresh user data
+  Future<void> _refreshUserData() async {
+    await _loadCurrentUser();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -35,8 +83,47 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Hiển thị loading khi đang tải user
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Đang tải thông tin tài khoản...',
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Nếu không có user, hiển thị màn hình trống (sẽ redirect về login)
+    if (_currentUser == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Không tìm thấy thông tin tài khoản'),
+        ),
+      );
+    }
+
+    // Tạo danh sách screens với user thật
+    final List<Widget> screens = [
+      HomeScreen(user: _currentUser!),
+      const CartScreen(),
+      UserOrderScreen(userId: _currentUser!.id),
+      ProfileScreen(
+        user: _currentUser!,
+        onUserUpdated: _refreshUserData, // ← Callback để refresh data
+      ),
+    ];
+
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
@@ -44,19 +131,19 @@ class _MainScreenState extends State<MainScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Trang Chủ',
+            label: 'Trang Chủ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
-            label: 'Giỏ hàng',
+            label: 'Giỏ hàng',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.receipt_long),
-            label: 'Đơn Hàng',
+            label: 'Đơn Hàng',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Cá Nhân',
+            label: 'Cá Nhân',
           ),
         ],
         currentIndex: _selectedIndex,

@@ -3,11 +3,17 @@ import 'package:app_ban_tranh/models/user.dart';
 import 'package:flutter/material.dart';
 
 class UserInfoScreen extends StatelessWidget {
-  const UserInfoScreen({Key? key}) : super(key: key);
+  final User user; // Thêm parameter user
+
+  const UserInfoScreen({
+    Key? key, 
+    required this.user, // Yêu cầu truyền user
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final user = User.sampleUser;
+    // Sử dụng user được truyền vào thay vì User.sampleUser
+    // final user = User.sampleUser; // Xóa dòng này
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -29,6 +35,11 @@ class UserInfoScreen extends StatelessWidget {
             icon: const Icon(Icons.edit_outlined),
             onPressed: () {
               // Navigate to edit profile
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Chức năng chỉnh sửa đang phát triển'),
+                ),
+              );
             },
           ),
         ],
@@ -121,10 +132,16 @@ class UserInfoScreen extends StatelessWidget {
             _buildInfoCard([
               _buildInfoRow(
                   Icons.person_outline, 'Tên người dùng', user.username),
+              _buildInfoRow(
+                  Icons.badge_outlined, 'Họ và tên', user.username), // Thêm fullName
               _buildInfoRow(Icons.email_outlined, 'Email', user.email),
               if (user.phoneNumber != null)
                 _buildInfoRow(
                     Icons.phone_outlined, 'Số điện thoại', user.phoneNumber!),
+              // Thêm phone nếu có
+              if (user.phoneNumber != null)
+                _buildInfoRow(
+                    Icons.phone_outlined, 'Điện thoại', user.phoneNumber!),
             ]),
 
             const SizedBox(height: 24),
@@ -176,6 +193,11 @@ class UserInfoScreen extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       // Navigate to edit profile
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Chức năng chỉnh sửa đang phát triển'),
+                        ),
+                      );
                     },
                     icon: const Icon(Icons.edit),
                     label: const Text('Chỉnh sửa'),
@@ -294,7 +316,8 @@ class UserInfoScreen extends StatelessWidget {
   }
 
   bool _hasAddressInfo(User user) {
-    return user.address1 != null ||
+    return // Thêm kiểm tra address
+        user.address1 != null ||
         user.address2 != null ||
         user.city != null ||
         user.state != null ||
@@ -330,7 +353,11 @@ class UserInfoScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Perform logout action
+                // Perform logout action - Navigate to login screen
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/login', // Hoặc route name của login screen
+                  (route) => false,
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,

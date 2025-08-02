@@ -1,3 +1,4 @@
+import 'package:app_ban_tranh/repositories/user_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/screens/auth/login_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -345,8 +346,61 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Hàm xử lý đăng ký người dùng (chưa triển khai)
-  void _handleRegister() {
-    // TODO: Gửi dữ liệu lên server, xử lý backend
-    print("Register button clicked");
+void _handleRegister() async {
+  // Hiển thị loading
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => const Center(
+      child: CircularProgressIndicator(),
+    ),
+  );
+
+  try {
+    final userRepository = UserRepository();
+    final result = await userRepository.register(
+      username: _usernameController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    // Đóng loading
+    Navigator.of(context).pop();
+
+    if (result['success']) {
+      // Đăng ký thành công
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Đăng ký thành công!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      // Chuyển về login screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    } else {
+      // Hiển thị lỗi
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message']),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  } catch (e) {
+    // Đóng loading
+    Navigator.of(context).pop();
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Lỗi: ${e.toString()}'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
+
 }
