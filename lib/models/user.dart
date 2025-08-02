@@ -3,6 +3,8 @@ class User {
   final String id;
   final String username;
   final String email;
+  final String? firstName;    // ✨ THÊM MỚI
+  final String? lastName;     // ✨ THÊM MỚI
   final String? profilePictureUrl;
   final String? phoneNumber;
   final String? address1;
@@ -20,6 +22,8 @@ class User {
     required this.id,
     required this.username,
     required this.email,
+    this.firstName,           // ✨ THÊM MỚI
+    this.lastName,            // ✨ THÊM MỚI
     this.profilePictureUrl,
     this.phoneNumber,
     this.address1,
@@ -34,12 +38,26 @@ class User {
     this.updatedAt,
   });
 
+  // ✨ Getter để lấy tên đầy đủ
+  String get fullName {
+    if (firstName != null && lastName != null) {
+      return '$firstName $lastName'.trim();
+    } else if (firstName != null) {
+      return firstName!;
+    } else if (lastName != null) {
+      return lastName!;
+    }
+    return username; // Fallback về username nếu không có họ tên
+  }
+
   // Factory từ JSON (API)
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
       username: json['name'] as String,
       email: json['email'] as String,
+      firstName: json['firstName'] as String?,        // ✨ THÊM MỚI
+      lastName: json['lastName'] as String?,          // ✨ THÊM MỚI
       profilePictureUrl: json['profilePictureUrl'] as String?,
       phoneNumber: json['phoneNumber'] as String?,
       address1: json['address1'] as String?,
@@ -58,6 +76,8 @@ class User {
       id: map['id'] as String,
       username: map['username'] as String,
       email: map['email'] as String,
+      firstName: map['first_name'] as String?,        // ✨ THÊM MỚI
+      lastName: map['last_name'] as String?,          // ✨ THÊM MỚI
       profilePictureUrl: map['profile_picture_url'] as String?,
       phoneNumber: map['phone_number'] as String?,
       address1: map['address1'] as String?,
@@ -82,6 +102,8 @@ class User {
       'id': id,
       'name': username,
       'email': email,
+      'firstName': firstName,                         // ✨ THÊM MỚI
+      'lastName': lastName,                           // ✨ THÊM MỚI
       'profilePictureUrl': profilePictureUrl,
       'phoneNumber': phoneNumber,
       'address1': address1,
@@ -100,6 +122,8 @@ class User {
       'id': id,
       'username': username,
       'email': email,
+      'first_name': firstName,                        // ✨ THÊM MỚI
+      'last_name': lastName,                          // ✨ THÊM MỚI
       'profile_picture_url': profilePictureUrl,
       'phone_number': phoneNumber,
       'address1': address1,
@@ -125,6 +149,8 @@ class User {
     String? id,
     String? username,
     String? email,
+    String? firstName,          // ✨ THÊM MỚI
+    String? lastName,           // ✨ THÊM MỚI
     String? profilePictureUrl,
     String? phoneNumber,
     String? address1,
@@ -142,6 +168,8 @@ class User {
       id: id ?? this.id,
       username: username ?? this.username,
       email: email ?? this.email,
+      firstName: firstName ?? this.firstName,        // ✨ THÊM MỚI
+      lastName: lastName ?? this.lastName,           // ✨ THÊM MỚI
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       address1: address1 ?? this.address1,
@@ -156,6 +184,4 @@ class User {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-
-
 }

@@ -240,7 +240,7 @@ Widget _buildArtworkCard(BuildContext context, ArtworkItem artwork) {
                 Row(
                   children: [
                     SizedBox(
-                      width: 100, // Đặt chiều rộng cố định cho nút
+                      width: 155, // Đặt chiều rộng cố định cho nút
                       height: 32,
                       child: OutlinedButton(
                         onPressed: () {
@@ -282,26 +282,7 @@ Widget _buildArtworkCard(BuildContext context, ArtworkItem artwork) {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      height: 32,
-                      width: 32,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: IconButton(
-                        onPressed: () {
-                          print('Add to cart: ${artwork.title}');
-                          // Có thể thêm logic thêm vào giỏ hàng ở đây
-                        },
-                        icon: const Icon(
-                          Icons.shopping_cart,
-                          color: Colors.white,
-                          size: 14,
-                        ),
-                        padding: EdgeInsets.zero,
-                      ),
-                    ),
+
                   ],
                 ),
               ],

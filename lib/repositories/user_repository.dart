@@ -14,14 +14,19 @@ class UserRepository {
 
   // ==================== AUTHENTICATION ====================
   
-  /// Đăng ký người dùng mới
+  /// Đăng ký người dùng mới - ✅ CẬP NHẬT với firstName và lastName
   Future<Map<String, dynamic>> register({
     required String username,
     required String email,
     required String password,
+    String? firstName,    // ✅ THÊM MỚI
+    String? lastName,     // ✅ THÊM MỚI
   }) async {
     try {
       final db = await _databaseHelper.database;
+      
+      // ✅ Kiểm tra và thêm cột nếu cần thiết
+      await _ensureColumnsExist(db);
       
       // Kiểm tra email đã tồn tại chưa
       final existingUsers = await db.query(
@@ -46,6 +51,8 @@ class UserRepository {
         username: username,
         email: email,
         password: hashedPassword,
+        firstName: firstName,    // ✅ THÊM MỚI
+        lastName: lastName,      // ✅ THÊM MỚI
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -80,6 +87,9 @@ class UserRepository {
   }) async {
     try {
       final db = await _databaseHelper.database;
+      
+      // ✅ Kiểm tra và thêm cột nếu cần thiết
+      await _ensureColumnsExist(db);
       
       // Tìm user theo email hoặc username
       final users = await db.query(
@@ -129,15 +139,20 @@ class UserRepository {
     }
   }
   
-  /// Đăng nhập với Google
+  /// Đăng nhập với Google - ✅ CẬP NHẬT với firstName và lastName
   Future<Map<String, dynamic>> loginWithGoogle({
     required String googleId,
     required String email,
     required String username,
     String? profilePictureUrl,
+    String? firstName,    // ✅ THÊM MỚI
+    String? lastName,     // ✅ THÊM MỚI
   }) async {
     try {
       final db = await _databaseHelper.database;
+      
+      // ✅ Kiểm tra và thêm cột nếu cần thiết
+      await _ensureColumnsExist(db);
       
       // Kiểm tra user đã tồn tại chưa
       final existingUsers = await db.query(
@@ -160,6 +175,8 @@ class UserRepository {
             {
               'google_id': googleId,
               'profile_picture_url': profilePictureUrl,
+              'first_name': firstName,    // ✅ THÊM MỚI
+              'last_name': lastName,      // ✅ THÊM MỚI
               'updated_at': DateTime.now().toIso8601String(),
             },
             where: 'id = ?',
@@ -169,6 +186,8 @@ class UserRepository {
           user = user.copyWith(
             googleId: googleId,
             profilePictureUrl: profilePictureUrl,
+            firstName: firstName,       // ✅ THÊM MỚI
+            lastName: lastName,         // ✅ THÊM MỚI
             updatedAt: DateTime.now(),
           );
         }
@@ -181,6 +200,8 @@ class UserRepository {
           email: email,
           googleId: googleId,
           profilePictureUrl: profilePictureUrl,
+          firstName: firstName,         // ✅ THÊM MỚI
+          lastName: lastName,           // ✅ THÊM MỚI
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
@@ -241,6 +262,9 @@ class UserRepository {
     try {
       final db = await _databaseHelper.database;
       
+      // ✅ Kiểm tra và thêm cột nếu cần thiết
+      await _ensureColumnsExist(db);
+      
       // Lấy session hiện tại
       final sessions = await db.query(
         'user_sessions',
@@ -282,10 +306,13 @@ class UserRepository {
     return user != null;
   }
   
-  /// Cập nhật thông tin profile
+  /// Cập nhật thông tin profile - ✅ CẬP NHẬT với error handling
   Future<Map<String, dynamic>> updateProfile(User updatedUser) async {
     try {
       final db = await _databaseHelper.database;
+      
+      // ✅ Kiểm tra và thêm cột nếu cần thiết
+      await _ensureColumnsExist(db);
       
       final updateData = updatedUser.copyWith(
         updatedAt: DateTime.now(),
@@ -314,6 +341,7 @@ class UserRepository {
       }
       
     } catch (e) {
+      print('❌ Lỗi updateProfile chi tiết: $e');
       return {
         'success': false,
         'message': 'Lỗi cập nhật: ${e.toString()}',
@@ -377,6 +405,58 @@ class UserRepository {
   }
   
   // ==================== HELPER METHODS ====================
+  
+  /// ✅ THÊM MỚI - Kiểm tra và thêm cột first_name, last_name nếu chưa có
+  Future<void> _ensureColumnsExist(Database db) async {
+    try {
+      // Kiểm tra cấu trúc bảng hiện tại
+      final List<Map<String, dynamic>> columns = await db.rawQuery('PRAGMA table_info(users)');
+      
+      final columnNames = columns.map((col) => col['name'] as String).toList();
+      
+      // Thêm cột first_name nếu chưa có
+      if (!columnNames.contains('first_name')) {
+        await db.execute('ALTER TABLE users ADD COLUMN first_name TEXT');
+        print('✅ Đã thêm cột first_name');
+      }
+      
+      // Thêm cột last_name nếu chưa có
+      if (!columnNames.contains('last_name')) {
+        await db.execute('ALTER TABLE users ADD COLUMN last_name TEXT');
+        print('✅ Đã thêm cột last_name');
+      }
+      
+    } catch (e) {
+      print('❌ Lỗi kiểm tra/thêm cột: $e');
+      // Nếu có lỗi, có thể là do cột đã tồn tại, bỏ qua
+    }
+  }
+  
+  /// ✅ THÊM MỚI - Debug database structure
+  Future<void> debugDatabaseStructure() async {
+    try {
+      final db = await _databaseHelper.database;
+      
+      // Kiểm tra cấu trúc bảng
+      final List<Map<String, dynamic>> columns = await db.rawQuery('PRAGMA table_info(users)');
+      
+      print('📋 Cấu trúc bảng users:');
+      for (final column in columns) {
+        print('  - ${column['name']}: ${column['type']} (nullable: ${column['notnull'] == 0})');
+      }
+      
+      // Kiểm tra version database
+      final version = await db.getVersion();
+      print('📊 Database version: $version');
+      
+      // Đếm số user
+      final count = Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM users'));
+      print('👥 Số lượng users: $count');
+      
+    } catch (e) {
+      print('❌ Lỗi debug database: $e');
+    }
+  }
   
   /// Tạo ID ngẫu nhiên cho user
   String _generateUserId() {
