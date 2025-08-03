@@ -1,10 +1,15 @@
 // lib/screens/productdetail_screen.dart
 import 'package:app_ban_tranh/screens/product_for_category_screen.dart';
 import 'package:app_ban_tranh/screens/cart_screen.dart';
+import 'package:app_ban_tranh/screens/home_screen.dart';
+import 'package:app_ban_tranh/screens/order_screen.dart';
+import 'package:app_ban_tranh/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
 import 'package:app_ban_tranh/database/database_helper.dart';
 import 'package:app_ban_tranh/repositories/cart_repository.dart';
+import 'package:app_ban_tranh/repositories/user_repository.dart';
+
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
 
@@ -27,8 +32,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   // Danh sách ID tác phẩm yêu thích
   final List<String> _favoriteIds = [];
   final CartRepository _cartRepository = CartRepository();
+  final UserRepository _userRepository = UserRepository();
   // Danh sách giỏ hàng (có thể chuyển thành state management sau này)
   final List<String> _cartItems = [];
+  
+  // Thêm biến để theo dõi tab đang chọn
+  int _selectedIndex = 0;
   
   final List<String> images = [
     'assets/images/bh2.jpg',
@@ -49,6 +58,47 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void initState() {
     super.initState();
     _loadArtworkFromDatabase();
+  }
+
+  // Phương thức xử lý khi chọn tab
+  void _onItemTapped(int index) async {
+    if (index != _selectedIndex) {
+      // Nếu chọn tab khác với tab hiện tại
+      final currentUser = await _userRepository.getCurrentUser();
+      
+      if (index == 0) { // Trang chủ
+        if (currentUser != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen(user: currentUser)),
+          );
+        }
+      } else if (index == 1) { // Giỏ hàng
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const CartScreen()),
+        );
+      } else if (index == 2) { // Đơn hàng
+        if (currentUser != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => UserOrderScreen(userId: currentUser.id)),
+          );
+        }
+      } else if (index == 3) { // Cá nhân
+        if (currentUser != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfileScreen(
+                user: currentUser,
+                onUserUpdated: () {}, // Callback trống
+              ),
+            ),
+          );
+        }
+      }
+    }
   }
 
   // Hàm mới để tải dữ liệu từ database
@@ -1016,6 +1066,34 @@ void _addToCart(String id) async {
                     ],
                   ),
                 ),
+      // Thêm BottomNavigationBar giống như trong main_screen.dart
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        elevation: 8,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Trang Chủ',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Giỏ hàng',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.receipt_long),
+            label: 'Đơn Hàng',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Cá Nhân',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+      ),
     );
   }
 
@@ -1169,3 +1247,4 @@ String _formatPrice(String price) {
   // Trả về giá gốc nếu không xử lý được
   return price;
 }
+
