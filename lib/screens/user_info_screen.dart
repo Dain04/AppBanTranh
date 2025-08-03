@@ -177,11 +177,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                 _buildInfoRow(
                     Icons.badge_outlined, 'Họ và tên', currentUser.fullName),
               if (currentUser.firstName != null)
-                _buildInfoRow(
-                    Icons.person, 'Họ', currentUser.firstName!),
-              if (currentUser.lastName != null)
-                _buildInfoRow(
-                    Icons.badge, 'Tên', currentUser.lastName!),
               _buildInfoRow(Icons.email_outlined, 'Email', currentUser.email),
               if (currentUser.phoneNumber != null)
                 _buildInfoRow(
@@ -197,10 +192,8 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
               _buildInfoCard([
                 if (currentUser.address1 != null)
                   _buildInfoRow(
-                      Icons.home_outlined, 'Địa chỉ 1', currentUser.address1!),
+                      Icons.home_outlined, 'Địa chỉ', currentUser.address1!),
                 if (currentUser.address2 != null)
-                  _buildInfoRow(
-                      Icons.home_work_outlined, 'Địa chỉ 2', currentUser.address2!),
                 if (currentUser.city != null)
                   _buildInfoRow(
                       Icons.location_city_outlined, 'Thành phố', currentUser.city!),
@@ -563,17 +556,8 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                   TextFormField(
                     controller: address1Controller,
                     decoration: const InputDecoration(
-                      labelText: 'Địa chỉ 1',
+                      labelText: 'Địa chỉ',
                       prefixIcon: Icon(Icons.home_outlined),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: address2Controller,
-                    decoration: const InputDecoration(
-                      labelText: 'Địa chỉ 2 (tùy chọn)',
-                      prefixIcon: Icon(Icons.home_work_outlined),
                       border: OutlineInputBorder(),
                     ),
                   ),
