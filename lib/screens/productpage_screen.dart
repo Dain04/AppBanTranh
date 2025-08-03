@@ -1,3 +1,4 @@
+// lib/screens/productpage_screen.dart
 import 'package:app_ban_tranh/screens/productdetail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
@@ -270,12 +271,13 @@ Widget _buildArtworkCard(BuildContext context, ArtworkItem artwork) {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
+                    // Đoạn code đã được sửa - Hiển thị giá tiền
                     Text(
-                      'Price: ${artwork.price}',
+                      'Price: ${_formatPrice(artwork.price)} VNĐ',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
-                        color: Colors.black,
+                        color: Colors.red,
                       ),
                     ),
                   ],
@@ -371,4 +373,39 @@ Widget _buildCategoryItem(String title, String imagePath) {
       ],
     ),
   );
+}
+
+// Thêm hàm định dạng giá tiền - giống hàm trong productdetail_screen.dart
+String _formatPrice(String price) {
+  // Xử lý trường hợp giá có định dạng số thập phân
+  if (price.contains('.')) {
+    double? priceValue = double.tryParse(price);
+    if (priceValue != null) {
+      return priceValue.toInt().toString().replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (Match m) => '${m[1]}.',
+          );
+    }
+  }
+  
+  // Xử lý trường hợp giá đã có định dạng VNĐ
+  if (price.contains('VNĐ')) {
+    String priceStr = price.replaceAll('VNĐ', '').trim();
+    return priceStr;
+  }
+  
+  // Xử lý các trường hợp khác
+  if (price != 'Price on request') {
+    String priceStr = price.replaceAll('.', '').replaceAll(',', '');
+    int? numPrice = int.tryParse(priceStr);
+    if (numPrice != null) {
+      return numPrice.toString().replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (Match m) => '${m[1]}.',
+          );
+    }
+  }
+  
+  // Trả về giá gốc nếu không xử lý được
+  return price;
 }

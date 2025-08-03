@@ -1,18 +1,25 @@
-// TODO Implement this library.
 import 'package:app_ban_tranh/models/cart.dart';
 import 'package:app_ban_tranh/models/order.dart';
+import 'package:app_ban_tranh/repositories/cart_repository.dart';
 import 'package:app_ban_tranh/screens/info_payment_screen.dart';
 import 'package:flutter/material.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   const CartScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  final CartRepository _cartRepository = CartRepository();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Đơn Hàng',
+          'Đơn Hàng',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -25,17 +32,32 @@ class CartScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: cartArtworkItems.length,
-          itemBuilder: (context, index) {
-            final item = cartArtworkItems[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: _buildArtworkCard(context, item),
+        child: StreamBuilder<List<CartArtworkItem>>(
+          stream: _cartRepository.cartStream,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Lỗi: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('Giỏ hàng trống'));
+            }
+            
+            final cartItems = snapshot.data!;
+            return ListView.builder(
+              itemCount: cartItems.length,
+              itemBuilder: (context, index) {
+                final item = cartItems[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: _buildArtworkCard(context, item),
+                );
+              },
             );
           },
         ),
       ),
+      // Đã xóa phần bottomNavigationBar hiển thị tổng tiền và nút thanh toán tất cả
     );
   }
 
@@ -51,7 +73,7 @@ class CartScreen extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color:
-                  Colors.black.withOpacity(0.05), //tạo độ shadow xung quang
+                  Colors.black.withOpacity(0.05), //tạo độ shadow xung quang
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -61,7 +83,7 @@ class CartScreen extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //ảnh
+            //ảnh
             Container(
               width: 100,
               height: 150,
@@ -104,7 +126,7 @@ class CartScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //tiêu đề
+                  //tiêu đề
                   Text(
                     item.title,
                     style: TextStyle(
@@ -114,7 +136,7 @@ class CartScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  //tác giả
+                  //tác giả
                   Text(
                     item.artist,
                     style: TextStyle(
@@ -123,7 +145,7 @@ class CartScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  //Năm sáng tác
+                  //Năm sáng tác
                   Text(
                     'Năm: ${item.yearcreated ?? 'N/A'}',
                     style: TextStyle(
@@ -131,7 +153,7 @@ class CartScreen extends StatelessWidget {
                       color: Colors.grey[500],
                     ),
                   ),
-                  //chất liệu
+                  //chất liệu
                   Text(
                     item.material ?? 'N/A',
                     style: TextStyle(
@@ -140,20 +162,12 @@ class CartScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  //giá
-                  Text(
-                    '${_formatPrice(item.price)} VNĐ',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                  ),
+                  // Đã xóa phần hiển thị giá tiền
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      //btn thanh toán
+                      //btn thanh toán
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -171,7 +185,7 @@ class CartScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
-                            'Thanh toán',
+                            'Thanh toán',
                             style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.green,
@@ -179,7 +193,7 @@ class CartScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      //btn xoá
+                      //btn xoá
                       GestureDetector(
                         onTap: () {
                           _showDeleteDialog(context, item);
@@ -190,7 +204,7 @@ class CartScreen extends StatelessWidget {
                               color: Colors.red.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8)),
                           child: const Text(
-                            'Xoá',
+                            'Xoá',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.red,
@@ -209,49 +223,59 @@ class CartScreen extends StatelessWidget {
       ),
     );
   }
+
+  void _showDeleteDialog(BuildContext context, CartArtworkItem item) {
+    //hiện box xác nhận xoá
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Xác nhận xoá ',
+          ),
+          content: Text(
+            'Bạn có chắc xoá đơn hàng \n${item.title} chứ?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); //đóng hộp thoại
+              },
+              child: const Text('Huỷ'),
+            ),
+            TextButton(
+              onPressed: () async {
+                //hàm thực hiện xoá
+                await _cartRepository.removeFromCart(item.id);
+                Navigator.of(context).pop(); //đóng sau khi xoá
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Đã xoá ${item.title}')),
+                );
+              },
+              child: const Text(
+                'Xoá',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  @override
+  void dispose() {
+    _cartRepository.dispose();
+    super.dispose();
+  }
 }
 
+// Vẫn giữ lại hàm _formatPrice để sử dụng trong trường hợp cần thiết
 String _formatPrice(String price) {
   final numPrice = int.tryParse(price) ?? 0;
   return numPrice.toString().replaceAllMapped(
         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
         (Match m) => '${m[1]}.',
       );
-}
-
-void _showDeleteDialog(BuildContext context, CartArtworkItem item) {
-  //hiện box xác nhận xoá
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text(
-          'Xác nhận xoá ',
-        ),
-        content: Text(
-          'Bạn có chắc xoá đơn hàng \n${item.title} chứ?',
-          style: TextStyle(fontSize: 16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); //đóng hộp thoại
-            },
-            child: const Text('Huỷ'),
-          ),
-          TextButton(
-            onPressed: () {
-              //hàm thực hiện xoá
-              Navigator.of(context).pop(); //đóng sau khi xoá
-              print('Đã xoá ${item.title}');
-            },
-            child: const Text(
-              'Xoá',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      );
-    },
-  );
 }

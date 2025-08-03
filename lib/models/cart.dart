@@ -23,16 +23,16 @@ final List<CartArtworkItem> cartArtworkItems = [
     id: '1', // Thêm id cho mỗi item
     title: 'Flower in Oddy',
     artist: 'LT Nghiax',
-    price: '11500000',
-    material: 'Sơn dầu',
-    yearcreated: '2023', // Năm sáng tác
+    price: '100,000,000',
+    material: 'Acrylic',
+    yearcreated: '1980', // Năm sáng tác
     imagePath: 'assets/images/flowerstyle.jpg',
   ),
   CartArtworkItem(
     id: '2',
     title: 'Think',
     artist: 'Doonstrij2',
-    price: '11500000',
+    price: '112,500,000',
     material: 'Sơn dầu',
     yearcreated: '2023',
     imagePath: 'assets/images/flowerstyle.jpg',

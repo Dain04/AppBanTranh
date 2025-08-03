@@ -1,6 +1,7 @@
 import 'package:app_ban_tranh/models/order.dart';
 import 'package:app_ban_tranh/screens/PaymentProgressCurve.dart';
 import 'package:app_ban_tranh/screens/cart_screen.dart';
+import 'package:app_ban_tranh/screens/main_screen.dart';
 import 'package:app_ban_tranh/screens/order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -811,7 +812,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CartScreen(),
+                          builder: (context) => MainScreen(),
                         ),
                       );
                     },

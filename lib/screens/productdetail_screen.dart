@@ -4,7 +4,7 @@ import 'package:app_ban_tranh/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
 import 'package:app_ban_tranh/database/database_helper.dart';
-
+import 'package:app_ban_tranh/repositories/cart_repository.dart';
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
 
@@ -26,7 +26,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   // Danh sách ID tác phẩm yêu thích
   final List<String> _favoriteIds = [];
-
+  final CartRepository _cartRepository = CartRepository();
   // Danh sách giỏ hàng (có thể chuyển thành state management sau này)
   final List<String> _cartItems = [];
   
@@ -160,27 +160,37 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     });
   }
 
-  // Hàm thêm vào giỏ hàng
-  void _addToCart(String id) {
-    setState(() {
-      if (!_cartItems.contains(id)) {
-        _cartItems.add(id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Đã thêm "${currentArtwork!.title}" vào giỏ hàng'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sản phẩm đã có trong giỏ hàng'),
-            duration: Duration(seconds: 1),
-          ),
-        );
-      }
-    });
+// Cập nhật phương thức _addToCart
+void _addToCart(String id) async {
+  if (currentArtwork != null) {
+    final success = await _cartRepository.addToCart(currentArtwork!);
+    
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã thêm "${currentArtwork!.title}" vào giỏ hàng'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      
+      // Cập nhật số lượng sản phẩm trong giỏ hàng
+      final cartItemCount = await _cartRepository.getCartItemCount();
+      setState(() {
+        _cartItems.clear();
+        for (int i = 0; i < cartItemCount; i++) {
+          _cartItems.add('item');
+        }
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không thể thêm sản phẩm vào giỏ hàng'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
+}
 
   void _onThumbnailTap(int index) {
     setState(() {
@@ -523,6 +533,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                       const SizedBox(height: 8),
 
+                      // Đoạn code đã được sửa - Hiển thị giá tiền
                       Align(
                         alignment: Alignment.center,
                         child: Text.rich(
@@ -537,7 +548,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 ),
                               ),
                               TextSpan(
-                                text: currentArtwork!.price,
+                                text: '${_formatPrice(currentArtwork!.price)} VNĐ',
                                 style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
@@ -1103,9 +1114,9 @@ Widget _buildSimilarProduct(ArtworkItem artwork) {
                         overflow: TextOverflow.ellipsis,
                       ),
                       
-                      // Giá
+                      // Giá - Sử dụng hàm _formatPrice cho sản phẩm tương tự
                       Text(
-                        artwork.price,
+                        '${_formatPrice(artwork.price)} VNĐ',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -1124,3 +1135,37 @@ Widget _buildSimilarProduct(ArtworkItem artwork) {
   );
 }
 
+// Hàm định dạng giá tiền - thêm mới
+String _formatPrice(String price) {
+  // Xử lý trường hợp giá có định dạng số thập phân
+  if (price.contains('.')) {
+    double? priceValue = double.tryParse(price);
+    if (priceValue != null) {
+      return priceValue.toInt().toString().replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (Match m) => '${m[1]}.',
+          );
+    }
+  }
+  
+  // Xử lý trường hợp giá đã có định dạng VNĐ
+  if (price.contains('VNĐ')) {
+    String priceStr = price.replaceAll('VNĐ', '').trim();
+    return priceStr;
+  }
+  
+  // Xử lý các trường hợp khác
+  if (price != 'Price on request') {
+    String priceStr = price.replaceAll('.', '').replaceAll(',', '');
+    int? numPrice = int.tryParse(priceStr);
+    if (numPrice != null) {
+      return numPrice.toString().replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (Match m) => '${m[1]}.',
+          );
+    }
+  }
+  
+  // Trả về giá gốc nếu không xử lý được
+  return price;
+}
