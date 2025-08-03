@@ -3,14 +3,15 @@ import 'package:app_ban_tranh/screens/product_for_category_screen.dart';
 import 'package:app_ban_tranh/screens/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
+import 'package:app_ban_tranh/database/database_helper.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
 
   const ProductDetailScreen({
-    Key? key,
+    super.key,
     required this.productId,
-  }) : super(key: key);
+  });
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -21,30 +22,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int selectedImageIndex = 0;
   PageController pageController = PageController();
   ScrollController thumbnailScrollController = ScrollController();
+  bool _isLoading = true;
 
   // Danh sách ID tác phẩm yêu thích
-  List<String> _favoriteIds = [];
-
-  // Hàm lấy danh sách tác phẩm tương tự (cùng category)
-  List<ArtworkItem> _getSimilarArtworks() {
-    if (currentArtwork == null) return [];
-
-    // Kết hợp cả hai danh sách artwork
-    List<ArtworkItem> allArtworks = [...newArtworks, ...homenewArtworks];
-
-    // Lọc các tác phẩm có cùng category và loại bỏ tác phẩm hiện tại
-    List<ArtworkItem> similarArtworks = allArtworks.where((artwork) {
-      return artwork.category == currentArtwork!.category &&
-          artwork.id != currentArtwork!.id;
-    }).toList();
-
-    // Trộn ngẫu nhiên và lấy tối đa 10 sản phẩm
-    similarArtworks.shuffle();
-    return similarArtworks.take(10).toList();
-  }
+  final List<String> _favoriteIds = [];
 
   // Danh sách giỏ hàng (có thể chuyển thành state management sau này)
-  List<String> _cartItems = [];
+  final List<String> _cartItems = [];
   
   final List<String> images = [
     'assets/images/bh2.jpg',
@@ -64,22 +48,87 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _findArtworkById();
+    _loadArtworkFromDatabase();
+  }
+
+  // Hàm mới để tải dữ liệu từ database
+  Future<void> _loadArtworkFromDatabase() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      // Lấy sản phẩm từ database theo ID
+      final DatabaseHelper dbHelper = DatabaseHelper();
+      
+      // Kiểm tra xem database đã có sản phẩm chưa
+      bool hasProducts = await dbHelper.hasProducts();
+      
+      if (!hasProducts) {
+        // Nếu chưa có sản phẩm, chỉ thêm newArtworks vào database
+        print('Đang thêm dữ liệu mẫu newArtworks vào database...');
+        await dbHelper.insertAllProducts(newArtworks);
+        print('Đã thêm ${newArtworks.length} sản phẩm vào database');
+      }
+      
+      // Lấy sản phẩm từ database theo ID
+      currentArtwork = await dbHelper.getProductById(widget.productId);
+      
+      if (currentArtwork == null) {
+        // Nếu không tìm thấy trong database, thử tìm trong dữ liệu cứng (legacy)
+        _findArtworkById();
+      }
+    } catch (e) {
+      print('Lỗi khi tải dữ liệu: $e');
+      // Thử tìm trong dữ liệu cứng nếu có lỗi
+      _findArtworkById();
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Hàm lấy danh sách tác phẩm tương tự (cùng category)
+  Future<List<ArtworkItem>> _getSimilarArtworks() async {
+    if (currentArtwork == null) return [];
+
+    try {
+      // Lấy tất cả sản phẩm từ database
+      final DatabaseHelper dbHelper = DatabaseHelper();
+      List<ArtworkItem> allArtworks = await dbHelper.getAllProducts();
+      
+      // Lọc các tác phẩm có cùng category và loại bỏ tác phẩm hiện tại
+      List<ArtworkItem> similarArtworks = allArtworks.where((artwork) {
+        return artwork.category == currentArtwork!.category &&
+            artwork.id != currentArtwork!.id;
+      }).toList();
+
+      // Trộn ngẫu nhiên và lấy tối đa 10 sản phẩm
+      similarArtworks.shuffle();
+      return similarArtworks.take(10).toList();
+    } catch (e) {
+      print('Lỗi khi lấy sản phẩm tương tự: $e');
+      
+      // Fallback: Sử dụng chỉ newArtworks nếu có lỗi
+      List<ArtworkItem> similarArtworks = newArtworks.where((artwork) {
+        return artwork.category == currentArtwork!.category &&
+            artwork.id != currentArtwork!.id;
+      }).toList();
+      similarArtworks.shuffle();
+      return similarArtworks.take(10).toList();
+    }
   }
 
   void _findArtworkById() {
     try {
+      // Chỉ tìm trong newArtworks
       currentArtwork = newArtworks.firstWhere(
         (artwork) => artwork.id == widget.productId,
       );
     } catch (e) {
-      try {
-        currentArtwork = homenewArtworks.firstWhere(
-          (artwork) => artwork.id == widget.productId,
-        );
-      } catch (e) {
-        currentArtwork = null;
-      }
+      print('Không tìm thấy sản phẩm với ID: ${widget.productId}');
+      currentArtwork = null;
     }
   }
 
@@ -245,372 +294,474 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         toolbarHeight: 60,
         leadingWidth: 70,
       ),
-      body: currentArtwork == null
-          ? const Center(
-              child: Text(
-                'Product not found',
-                style: TextStyle(fontSize: 18, color: Colors.red),
-              ),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Tên sản phẩm
-                  Text(
-                    currentArtwork!.title,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator()) // Hiển thị loading
+          : currentArtwork == null
+              ? const Center(
+                  child: Text(
+                    'Product not found',
+                    style: TextStyle(fontSize: 18, color: Colors.red),
                   ),
-                  const SizedBox(height: 8),
-
-                  // Hình ảnh sản phẩm
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Ảnh nền - nằm dưới cùng
-                        Container(
-                          width: 330,
-                          height: 430,
-                          decoration: const BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage('assets/images/khunggo.png'),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Tên sản phẩm
+                      Text(
+                        currentArtwork!.title,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
                         ),
+                      ),
+                      const SizedBox(height: 8),
 
-                        // Container chứa PageView - nằm trên ảnh nền
-                        Container(
-                          width: 260,
-                          height: 360,
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 10,
-                                offset: const Offset(0, 5),
-                                spreadRadius: 2,
+                      // Hình ảnh sản phẩm
+                      Center(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Ảnh nền - nằm dưới cùng
+                            Container(
+                              width: 330,
+                              height: 430,
+                              decoration: const BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage('assets/images/khunggo.png'),
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ],
-                          ),
-                          child: PageView.builder(
-                            controller: pageController,
-                            onPageChanged: (index) {
-                              setState(() {
-                                selectedImageIndex = index;
-                              });
-                            },
-                            itemCount: currentArtwork!.allImages.length,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  image: DecorationImage(
-                                    image: AssetImage(
-                                        currentArtwork!.allImages[index]),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+                            ),
 
-                  // Slider ảnh nhỏ
-                  if (currentArtwork!.allImages.length > 1)
-                    Center(
-                      child: SizedBox(
-                        height: 80,
-                        width: double.infinity,
-                        child: currentArtwork!.allImages.length <= 4
-                            ? Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  currentArtwork!.allImages.length,
-                                  (index) {
-                                    final isSelected =
-                                        index == selectedImageIndex;
-                                    return AnimatedContainer(
-                                      duration:
-                                          const Duration(milliseconds: 200),
-                                      curve: Curves.easeInOut,
-                                      width: 64,
-                                      height: isSelected ? 80 : 64,
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 8),
-                                      child: GestureDetector(
-                                        onTap: () => _onThumbnailTap(index),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            border: Border.all(
-                                              color: isSelected
-                                                  ? Colors.black
-                                                  : Colors.grey.shade300,
-                                              width: isSelected ? 2 : 1,
-                                            ),
-                                            image: DecorationImage(
-                                              image: AssetImage(currentArtwork!
-                                                  .allImages[index]),
-                                              fit: BoxFit.cover,
-                                            ),
-                                            boxShadow: isSelected
-                                                ? [
-                                                    BoxShadow(
-                                                      color: Colors.black
-                                                          .withOpacity(0.2),
-                                                      blurRadius: 6,
-                                                      offset:
-                                                          const Offset(0, 2),
-                                                    ),
-                                                  ]
-                                                : null,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              )
-                            : ListView.builder(
-                                controller: thumbnailScrollController,
-                                scrollDirection: Axis.horizontal,
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
+                            // Container chứa PageView - nằm trên ảnh nền
+                            Container(
+                              width: 260,
+                              height: 360,
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: PageView.builder(
+                                controller: pageController,
+                                onPageChanged: (index) {
+                                  setState(() {
+                                    selectedImageIndex = index;
+                                  });
+                                },
                                 itemCount: currentArtwork!.allImages.length,
                                 itemBuilder: (context, index) {
-                                  final isSelected =
-                                      index == selectedImageIndex;
-                                  return AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    curve: Curves.easeInOut,
-                                    width: 64,
-                                    height: isSelected ? 80 : 64,
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 8),
-                                    child: GestureDetector(
-                                      onTap: () => _onThumbnailTap(index),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? Colors.black
-                                                : Colors.grey.shade300,
-                                            width: isSelected ? 2 : 1,
-                                          ),
-                                          image: DecorationImage(
-                                            image: AssetImage(currentArtwork!
-                                                .allImages[index]),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          boxShadow: isSelected
-                                              ? [
-                                                  BoxShadow(
-                                                    color: Colors.black
-                                                        .withOpacity(0.2),
-                                                    blurRadius: 6,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ]
-                                              : null,
-                                        ),
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                            currentArtwork!.allImages[index]),
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                   );
                                 },
                               ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                  // Chỉ số ảnh hiện tại
-                  if (currentArtwork!.allImages.length > 1)
-                    Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          currentArtwork!.allImages.length,
-                          (index) => Container(
-                            width: 8,
-                            height: 8,
-                            margin: const EdgeInsets.symmetric(horizontal: 3),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: index == selectedImageIndex
-                                  ? Colors.black
-                                  : Colors.grey.shade400,
+                      // Slider ảnh nhỏ
+                      if (currentArtwork!.allImages.length > 1)
+                        Center(
+                          child: SizedBox(
+                            height: 80,
+                            width: double.infinity,
+                            child: currentArtwork!.allImages.length <= 4
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(
+                                      currentArtwork!.allImages.length,
+                                      (index) {
+                                        final isSelected =
+                                            index == selectedImageIndex;
+                                        return AnimatedContainer(
+                                          duration:
+                                              const Duration(milliseconds: 200),
+                                          curve: Curves.easeInOut,
+                                          width: 64,
+                                          height: isSelected ? 80 : 64,
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 8),
+                                          child: GestureDetector(
+                                            onTap: () => _onThumbnailTap(index),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: isSelected
+                                                      ? Colors.black
+                                                      : Colors.grey.shade300,
+                                                  width: isSelected ? 2 : 1,
+                                                ),
+                                                image: DecorationImage(
+                                                  image: AssetImage(currentArtwork!
+                                                      .allImages[index]),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                                boxShadow: isSelected
+                                                    ? [
+                                                        BoxShadow(
+                                                          color: Colors.black
+                                                              .withOpacity(0.2),
+                                                          blurRadius: 6,
+                                                          offset:
+                                                              const Offset(0, 2),
+                                                        ),
+                                                      ]
+                                                    : null,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    controller: thumbnailScrollController,
+                                    scrollDirection: Axis.horizontal,
+                                    padding:
+                                        const EdgeInsets.symmetric(horizontal: 16),
+                                    itemCount: currentArtwork!.allImages.length,
+                                    itemBuilder: (context, index) {
+                                      final isSelected =
+                                          index == selectedImageIndex;
+                                      return AnimatedContainer(
+                                        duration: const Duration(milliseconds: 200),
+                                        curve: Curves.easeInOut,
+                                        width: 64,
+                                        height: isSelected ? 80 : 64,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        child: GestureDetector(
+                                          onTap: () => _onThumbnailTap(index),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: isSelected
+                                                    ? Colors.black
+                                                    : Colors.grey.shade300,
+                                                width: isSelected ? 2 : 1,
+                                              ),
+                                              image: DecorationImage(
+                                                image: AssetImage(currentArtwork!
+                                                    .allImages[index]),
+                                                fit: BoxFit.cover,
+                                              ),
+                                              boxShadow: isSelected
+                                                  ? [
+                                                      BoxShadow(
+                                                        color: Colors.black
+                                                            .withOpacity(0.2),
+                                                        blurRadius: 6,
+                                                        offset: const Offset(0, 2),
+                                                      ),
+                                                    ]
+                                                  : null,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ),
+                      const SizedBox(height: 20),
+
+                      // Chỉ số ảnh hiện tại
+                      if (currentArtwork!.allImages.length > 1)
+                        Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              currentArtwork!.allImages.length,
+                              (index) => Container(
+                                width: 8,
+                                height: 8,
+                                margin: const EdgeInsets.symmetric(horizontal: 3),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: index == selectedImageIndex
+                                      ? Colors.black
+                                      : Colors.grey.shade400,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  const SizedBox(height: 20),
+                      const SizedBox(height: 20),
 
-                  // Thông tin sản phẩm
-                  Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Tác giả: ${currentArtwork!.artist}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                        color: Color.fromARGB(255, 13, 13, 13),
+                      // Thông tin sản phẩm
+                      Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          'Tác giả: ${currentArtwork!.artist}',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                            color: Color.fromARGB(255, 13, 13, 13),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                      const SizedBox(height: 8),
 
-                  Align(
-                    alignment: Alignment.center,
-                    child: Text.rich(
-                      TextSpan(
+                      Align(
+                        alignment: Alignment.center,
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              const TextSpan(
+                                text: 'Giá: ',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              TextSpan(
+                                text: currentArtwork!.price,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      // Row chứa nút favorite và add to cart
+                      Row(
                         children: [
-                          const TextSpan(
-                            text: 'Giá: ',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                          // Nút favorite
+                          Expanded(
+                            flex: 1,
+                            child: SizedBox(
+                              height: 50,
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  _toggleFavorite(currentArtwork!.id);
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(
+                                    color: _isFavorite(currentArtwork!.id)
+                                        ? Colors.red
+                                        : Colors.grey,
+                                    width: 2,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Icon(
+                                  _isFavorite(currentArtwork!.id)
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: _isFavorite(currentArtwork!.id)
+                                      ? Colors.red
+                                      : Colors.grey[600],
+                                  size: 24,
+                                ),
+                              ),
                             ),
                           ),
-                          TextSpan(
-                            text: '${currentArtwork!.price}',
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
+                          const SizedBox(width: 16),
+
+                          // Nút thêm vào giỏ hàng
+                          Expanded(
+                            flex: 3,
+                            child: SizedBox(
+                              height: 50,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  _addToCart(currentArtwork!.id);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                icon: const Icon(
+                                  Icons.shopping_cart,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                                label: const Text(
+                                  'Thêm vào giỏ hàng',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ),
+                      const SizedBox(height: 40),
 
-                  const SizedBox(height: 30),
-
-                  // Row chứa nút favorite và add to cart
-                  Row(
-                    children: [
-                      // Nút favorite
-                      Expanded(
-                        flex: 1,
-                        child: SizedBox(
-                          height: 50,
-                          child: OutlinedButton(
-                            onPressed: () {
-                              _toggleFavorite(currentArtwork!.id);
-                            },
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(
-                                color: _isFavorite(currentArtwork!.id)
-                                    ? Colors.red
-                                    : Colors.grey,
-                                width: 2,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Icon(
-                              _isFavorite(currentArtwork!.id)
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: _isFavorite(currentArtwork!.id)
-                                  ? Colors.red
-                                  : Colors.grey[600],
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-
-                      // Nút thêm vào giỏ hàng
-                      Expanded(
-                        flex: 3,
-                        child: SizedBox(
-                          height: 50,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              _addToCart(currentArtwork!.id);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            icon: const Icon(
-                              Icons.shopping_cart,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            label: const Text(
-                              'Thêm vào giỏ hàng',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-
-                  // Dòng kẻ
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      height: 1.5,
-                      width: 250,
-                      color: const Color.fromARGB(255, 89, 90, 90),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  Text(
-                    '"${currentArtwork!.description}"',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Color.fromARGB(255, 13, 13, 13),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Dòng kẻ
-                  Align(
-                    alignment: Alignment.center,
-                    child: Container(
-                      height: 1.5,
-                      width: 200,
-                      color: const Color.fromARGB(255, 89, 90, 90),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                      // Dòng kẻ
                       Align(
                         alignment: Alignment.center,
+                        child: Container(
+                          height: 1.5,
+                          width: 250,
+                          color: const Color.fromARGB(255, 89, 90, 90),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      Text(
+                        '"${currentArtwork!.description}"',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Color.fromARGB(255, 13, 13, 13),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Dòng kẻ
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          height: 1.5,
+                          width: 200,
+                          color: const Color.fromARGB(255, 89, 90, 90),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'Chi tiết tác phẩm nghệ thuật',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black.withOpacity(0.8),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Sử dụng Stack và Positioned cho Text
+                          SizedBox(
+                            height: 150,
+                            child: Stack(
+                              children: [
+                                // Text chất liệu
+                                Positioned(
+                                  left: 20,
+                                  top: 0,
+                                  child: Text(
+                                    'Chất liệu: ${currentArtwork!.material}',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+
+                                // Đường kẻ đầu tiên
+                                Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  top: 25,
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: Container(
+                                      height: 1,
+                                      width: 350,
+                                      color: const Color.fromARGB(255, 89, 90, 90),
+                                    ),
+                                  ),
+                                ),
+
+                                // Text năm sáng tác
+                                Positioned(
+                                  left: 20,
+                                  top: 40,
+                                  child: Text(
+                                    'Năm sáng tác: ${currentArtwork!.yearcreated}',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+
+                                // Đường kẻ thứ hai
+                                Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  top: 65,
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: Container(
+                                      height: 1,
+                                      width: 350,
+                                      color: const Color.fromARGB(255, 89, 90, 90),
+                                    ),
+                                  ),
+                                ),
+
+                                // Text thể loại
+                                Positioned(
+                                  left: 20,
+                                  top: 80,
+                                  child: Text(
+                                    'Thể loại: ${currentArtwork!.category}',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ),
+
+                                // Đường kẻ thứ ba
+                                Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  top: 105,
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: Container(
+                                      height: 1,
+                                      width: 350,
+                                      color: const Color.fromARGB(255, 89, 90, 90),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
+
+                      // Staggered grid view Bộ sưu tập
+                      Align(
+                        alignment: Alignment.centerLeft,
                         child: Text(
-                          'Chi tiết tác phẩm nghệ thuật',
+                          'Bộ sưu tập nổi bật',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -618,334 +769,242 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 16),
 
-                      // Sử dụng Stack và Positioned cho Text
+                      // Horizontal StaggeredGridView - Same height, different widths
                       SizedBox(
-                        height: 150,
-                        child: Stack(
-                          children: [
-                            // Text chất liệu
-                            Positioned(
-                              left: 20,
-                              top: 0,
-                              child: Text(
-                                'Chất liệu: ${currentArtwork!.material}',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
+                        height: 250,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: (images.length / 4).ceil(),
+                          itemBuilder: (context, groupIndex) {
+                            return Container(
+                              margin: const EdgeInsets.only(right: 12),
+                              child: Column(
+                                children: [
+                                  // Hàng trên
+                                  Row(
+                                    children: [
+                                      // Ảnh ngắn
+                                      if (groupIndex * 4 < images.length)
+                                        Container(
+                                          width: 120,
+                                          height: 115,
+                                          margin: const EdgeInsets.only(
+                                              right: 8, bottom: 8),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(8),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color:
+                                                    Colors.black.withOpacity(0.1),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Image.asset(
+                                              images[groupIndex * 4],
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
 
-                            // Đường kẻ đầu tiên
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              top: 25,
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Container(
-                                  height: 1,
-                                  width: 350,
-                                  color: const Color.fromARGB(255, 89, 90, 90),
-                                ),
-                              ),
-                            ),
+                                      // Ảnh dài
+                                      if (groupIndex * 4 + 1 < images.length)
+                                        Container(
+                                          width: 180,
+                                          height: 115,
+                                          margin: const EdgeInsets.only(bottom: 8),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(8),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color:
+                                                    Colors.black.withOpacity(0.1),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Image.asset(
+                                              images[groupIndex * 4 + 1],
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
 
-                            // Text năm sáng tác
-                            Positioned(
-                              left: 20,
-                              top: 40,
-                              child: Text(
-                                'Năm sáng tác: ${currentArtwork!.yearcreated}',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
+                                  // Hàng dưới
+                                  Row(
+                                    children: [
+                                      // Ảnh dài
+                                      if (groupIndex * 4 + 2 < images.length)
+                                        Container(
+                                          width: 180,
+                                          height: 115,
+                                          margin: const EdgeInsets.only(right: 8),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(8),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color:
+                                                    Colors.black.withOpacity(0.1),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Image.asset(
+                                              images[groupIndex * 4 + 2],
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
 
-                            // Đường kẻ thứ hai
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              top: 65,
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Container(
-                                  height: 1,
-                                  width: 350,
-                                  color: const Color.fromARGB(255, 89, 90, 90),
-                                ),
+                                      // Ảnh ngắn
+                                      if (groupIndex * 4 + 3 < images.length)
+                                        Container(
+                                          width: 120,
+                                          height: 115,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(8),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color:
+                                                    Colors.black.withOpacity(0.1),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Image.asset(
+                                              images[groupIndex * 4 + 3],
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            ),
-
-                            // Text thể loại
-                            Positioned(
-                              left: 20,
-                              top: 80,
-                              child: Text(
-                                'Thể loại: ${currentArtwork!.category}',
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-
-                            // Đường kẻ thứ ba
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              top: 105,
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Container(
-                                  height: 1,
-                                  width: 350,
-                                  color: const Color.fromARGB(255, 89, 90, 90),
-                                ),
-                              ),
-                            ),
-                          ],
+                            );
+                          },
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
 
-                  // Staggered grid view Bộ sưu tập
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Bộ sưu tập nổi bật',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black.withOpacity(0.8),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Horizontal StaggeredGridView - Same height, different widths
-                  SizedBox(
-                    height: 250,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: (images.length / 4).ceil(),
-                      itemBuilder: (context, groupIndex) {
-                        return Container(
-                          margin: const EdgeInsets.only(right: 12),
-                          child: Column(
+                      Align(
+                        alignment: Alignment.center,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/collection');
+                          },
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Hàng trên
-                              Row(
-                                children: [
-                                  // Ảnh ngắn
-                                  if (groupIndex * 4 < images.length)
-                                    Container(
-                                      width: 120,
-                                      height: 115,
-                                      margin: const EdgeInsets.only(
-                                          right: 8, bottom: 8),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.1),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.asset(
-                                          images[groupIndex * 4],
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-
-                                  // Ảnh dài
-                                  if (groupIndex * 4 + 1 < images.length)
-                                    Container(
-                                      width: 180,
-                                      height: 115,
-                                      margin: const EdgeInsets.only(bottom: 8),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.1),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.asset(
-                                          images[groupIndex * 4 + 1],
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                ],
+                              Text(
+                                'Xem thêm bộ sưu tập',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Color.fromARGB(255, 107, 108, 109),
+                                ),
                               ),
-
-                              // Hàng dưới
-                              Row(
-                                children: [
-                                  // Ảnh dài
-                                  if (groupIndex * 4 + 2 < images.length)
-                                    Container(
-                                      width: 180,
-                                      height: 115,
-                                      margin: const EdgeInsets.only(right: 8),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.1),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.asset(
-                                          images[groupIndex * 4 + 2],
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-
-                                  // Ảnh ngắn
-                                  if (groupIndex * 4 + 3 < images.length)
-                                    Container(
-                                      width: 120,
-                                      height: 115,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.1),
-                                            blurRadius: 4,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.asset(
-                                          images[groupIndex * 4 + 3],
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                ],
+                              Icon(
+                                Icons.arrow_forward,
+                                color: Color.fromARGB(255, 107, 108, 109),
                               ),
                             ],
                           ),
-                        );
-                      },
-                    ),
-                  ),
+                        ),
+                      ),
+                      const SizedBox(height: 1),
 
-                  Align(
-                    alignment: Alignment.center,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/collection');
-                      },
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Xem thêm bộ sưu tập',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Color.fromARGB(255, 107, 108, 109),
-                            ),
+                      // Dòng kẻ
+                      Transform.translate(
+                        offset: const Offset(0, -10),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            height: 1.5,
+                            width: 170,
+                            color: const Color.fromARGB(255, 89, 90, 90),
                           ),
-                          Icon(
-                            Icons.arrow_forward,
-                            color: Color.fromARGB(255, 107, 108, 109),
+                        ),
+                      
+                      ),
+                      const SizedBox(height: 30),
+
+                      // Sản phẩm tương tự
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Sản phẩm tương tự',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black.withOpacity(0.8),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 1),
+                      const SizedBox(height: 16),
 
-                  // Dòng kẻ
-                  Transform.translate(
-                    offset: const Offset(0, -10),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        height: 1.5,
-                        width: 170,
-                        color: const Color.fromARGB(255, 89, 90, 90),
+                      // Grid sản phẩm tương tự
+                      FutureBuilder<List<ArtworkItem>>(
+                        future: _getSimilarArtworks(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(
+                              child: Text(
+                                'Lỗi: ${snapshot.error}',
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            );
+                          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                'Không có sản phẩm tương tự',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            );
+                          } else {
+                            final similarArtworks = snapshot.data!;
+                            return GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                                childAspectRatio: 0.75,
+                              ),
+                              itemCount: similarArtworks.length > 6 ? 6 : similarArtworks.length,
+                              itemBuilder: (context, index) {
+                                final artwork = similarArtworks[index];
+                                return _buildSimilarProduct(artwork);
+                              },
+                            );
+                          }
+                        },
                       ),
-                    ),
-                  
+                      const SizedBox(height: 20),
+                    ],
                   ),
-                  const SizedBox(height: 30),
-
-                  // Sản phẩm tương tự
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Sản phẩm tương tự',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black.withOpacity(0.8),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Grid sản phẩm tương tự
-                  _buildSimilarProducts(),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
-    );
-  }
-
-  // Widget hiển thị sản phẩm tương tự
-  Widget _buildSimilarProducts() {
-    List<ArtworkItem> similarArtworks = _getSimilarArtworks();
-
-    if (similarArtworks.isEmpty) {
-      return const Center(
-        child: Text(
-          'Không có sản phẩm tương tự',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
-          ),
-        ),
-      );
-    }
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: similarArtworks.length > 6 ? 6 : similarArtworks.length,
-      itemBuilder: (context, index) {
-        final artwork = similarArtworks[index];
-        return _buildSimilarProduct(artwork);
-      },
+                ),
     );
   }
 
@@ -1064,3 +1123,4 @@ Widget _buildSimilarProduct(ArtworkItem artwork) {
     },
   );
 }
+

@@ -1,11 +1,54 @@
 import 'package:app_ban_tranh/screens/productdetail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
+import 'package:app_ban_tranh/database/database_helper.dart'; // Thêm import này
 
-class ProductPageScreen extends StatelessWidget {
+class ProductPageScreen extends StatefulWidget { // Chuyển thành StatefulWidget
   const ProductPageScreen({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
+
+  @override
+  State<ProductPageScreen> createState() => _ProductPageScreenState();
+}
+
+class _ProductPageScreenState extends State<ProductPageScreen> {
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
+  List<ArtworkItem> _products = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  // Phương thức để tải sản phẩm từ database
+  Future<void> _loadProducts() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Kiểm tra xem database đã có sản phẩm chưa
+    bool hasProducts = await _databaseHelper.hasProducts();
+    
+    if (!hasProducts) {
+      // Nếu chưa có sản phẩm, thêm dữ liệu mẫu từ product.dart
+      await _databaseHelper.insertAllProducts([
+        // ...homenewArtworks,
+        ...newArtworks,
+        // ...DauGiaTP,
+        // ...GioHang_TP
+      ]);
+    }
+    
+    // Lấy tất cả sản phẩm từ database
+    _products = await _databaseHelper.getAllProducts();
+    
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +56,7 @@ class ProductPageScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          'Trở lại trang chủ',
+          'Trở lại trang chủ',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -29,112 +72,114 @@ class ProductPageScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Search Box
-              TextField(
-                decoration: InputDecoration(
-                  hintText: 'Tìm kiếm',
-                  prefixIcon: Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide(
-                        color: const Color.fromARGB(255, 52, 51, 51),
-                        width: 1.0),
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Search Box
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Tìm kiếm',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                          color: const Color.fromARGB(255, 52, 51, 51),
+                          width: 1.0),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[200],
                   ),
-                  filled: true,
-                  fillColor: Colors.grey[200],
+                  onChanged: (value) {
+                    print('Tìm kiếm: $value');
+                  },
                 ),
-                onChanged: (value) {
-                  print('Tìm kiếm: $value');
-                },
-              ),
-              const SizedBox(height: 20),
-
-              // Artwork Categories Section
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-                    child: Text(
-                      'Artwork in type',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 150,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _buildCategoryItem(
-                              'Flower', 'assets/images/flowerstyle.jpg'),
-                          _buildCategoryItem(
-                              'Classic', 'assets/images/classisctyle.jpg'),
-                          _buildCategoryItem(
-                              'Modern', 'assets/images/modernstyle.jpg'),
-                          _buildCategoryItem(
-                              'Scene', 'assets/images/scene.jpg'),
-                          _buildCategoryItem(
-                              'Portrait', 'assets/images/portrait.jpg'),
-                          _buildCategoryItem(
-                              'Cultural', 'assets/images/Cultural.jpg')
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-
-              //___________________________________new artwork section_________________________
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text(
-                    'New Artwork',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // dòng kẻ màu xanh
-                  Container(
-                    height: 3,
-                    width: 120,
-                    color: Colors.blue,
-                  ),
-                ]),
                 const SizedBox(height: 20),
 
-                /// Danh sách các tác phẩm nghệ thuật mới
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16.0,
-                    mainAxisSpacing: 16.0,
-                    childAspectRatio: 0.55,
-                  ),
-                  itemCount: newArtworks.length,
-                  itemBuilder: (context, index) {
-                    return _buildArtworkCard(context, newArtworks[index]);
-                  },
-                )
-              ])
-            ],
+                // Artwork Categories Section
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                      child: Text(
+                        'Artwork in type',
+                        style:
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 150,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildCategoryItem(
+                                'Flower', 'assets/images/flowerstyle.jpg'),
+                            _buildCategoryItem(
+                                'Classic', 'assets/images/classisctyle.jpg'),
+                            _buildCategoryItem(
+                                'Modern', 'assets/images/modernstyle.jpg'),
+                            _buildCategoryItem(
+                                'Scene', 'assets/images/scene.jpg'),
+                            _buildCategoryItem(
+                                'Portrait', 'assets/images/portrait.jpg'),
+                            _buildCategoryItem(
+                                'Cultural', 'assets/images/Cultural.jpg')
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+
+                //___________________________________new artwork section_________________________
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Text(
+                      'New Artwork',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // dòng kẻ màu xanh
+                    Container(
+                      height: 3,
+                      width: 120,
+                      color: Colors.blue,
+                    ),
+                  ]),
+                  const SizedBox(height: 20),
+
+                  /// Danh sách các tác phẩm nghệ thuật từ database
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                      childAspectRatio: 0.55,
+                    ),
+                    itemCount: _products.length,
+                    itemBuilder: (context, index) {
+                      return _buildArtworkCard(context, _products[index]);
+                    },
+                  )
+                ])
+              ],
+            ),
           ),
         ),
-      ),
     );
   }
 }
@@ -265,7 +310,7 @@ Widget _buildArtworkCard(BuildContext context, ArtworkItem artwork) {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Xem chi tiết',
+                              'Xem chi tiết',
                               style: TextStyle(
                                 fontSize: 10,
                                 color: Colors.black,
