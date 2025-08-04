@@ -5,6 +5,7 @@ import 'package:app_ban_tranh/models/prodcut.dart';
 import 'package:app_ban_tranh/models/galleries.dart';
 import 'package:app_ban_tranh/screens/Live_screen.dart';
 import 'package:app_ban_tranh/screens/auction_screen.dart';
+import 'package:app_ban_tranh/screens/blog_screen.dart';
 import 'package:app_ban_tranh/screens/productdetail_screen.dart';
 import 'package:app_ban_tranh/screens/productpage_screen.dart';
 import 'package:flutter/material.dart';
@@ -536,176 +537,233 @@ class _HomeScreenState extends State<HomeScreen> {
     Blog artwork,
     BuildContext context,
   ) {
-    return Container(
-      margin: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header với title và 3 dots
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Expanded(
-                  child: Text(
-                    'NGHỆ THUẬT TRÊN GIẤY',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                // 3 dots
-                Row(
-                  children: List.generate(
-                    3,
-                    (index) => Container(
-                      margin: const EdgeInsets.only(left: 8),
-                      width: 15,
-                      height: 15,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Cập nhật lần cuối: ${artwork.timeupload}, 7:00 Sáng',
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            Expanded(
-              child: Stack(
-                clipBehavior: Clip.none,
+    return GestureDetector(
+      onTap: () {
+        // Navigate to blog detail screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BlogScreen(blogId: artwork.idblog),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.all(8.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header với title và 3 dots
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    width: 300,
-                    height: 300,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      image: DecorationImage(
-                        image: AssetImage(artwork.imagePath),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-
-                  // Text overlay bên phải
-                  Positioned(
-                    right: -35,
-                    top: 30,
-                    bottom: 30,
-                    child: Container(
-                      width: 180,
-                      height: 100,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.95),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(-2, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'BLOOD FALLS:',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Expanded(
-                            child: Text(
-                              artwork.description,
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 13,
-                                height: 1.4,
-                              ),
-                              maxLines: 6,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              'Đọc Tại Đây',
-                              style: TextStyle(
-                                color: Colors.black.withOpacity(0.8),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ),
-                        ],
+                  // 3 dots
+                  Row(
+                    children: List.generate(
+                      3,
+                      (index) => Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        width: 15,
+                        height: 15,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Bottom button
-            Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.7),
-                    width: 1.5,
-                  ),
+              const SizedBox(height: 8),
+              Text(
+                'Cập nhật lần cuối: ${artwork.timeupload}, 7:00 Sáng',
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Text(
-                      'Cuộn Qua Trang',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+              ),
+              const SizedBox(height: 20),
+
+              Expanded(
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 300,
+                      height: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: _buildImageForCard(artwork.imagePath),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Icon(
-                      Icons.arrow_forward,
-                      color: Colors.white,
-                      size: 16,
+
+                    // Text overlay bên phải
+                    Positioned(
+                      right: -35,
+                      top: 30,
+                      bottom: 30,
+                      child: Container(
+                        width: 140,
+                        height: 80,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.95),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(-2, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              artwork.nameblog.toUpperCase() + ':',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Expanded(
+                              child: Text(
+                                artwork.description,
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 13,
+                                  height: 1.4,
+                                ),
+                                maxLines: 6,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                'Đọc Tại Đây',
+                                style: TextStyle(
+                                  color: Colors.black.withOpacity(0.8),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 16),
+
+              // Bottom button
+              Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.7),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Cuộn Qua Trang',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+// Helper method để xử lý việc tải ảnh cho card
+  Widget _buildImageForCard(String imagePath) {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      // Nếu là URL thì dùng Image.network
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            color: const Color(0xFF3A3A3A),
+            child: Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+                color: Colors.white,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: const Color(0xFF3A3A3A),
+            child: const Center(
+              child: Icon(
+                Icons.image_not_supported,
+                color: Colors.grey,
+                size: 50,
+              ),
+            ),
+          );
+        },
+      );
+    } else {
+      // Nếu là local asset thì dùng Image.asset
+      return Image.asset(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: const Color(0xFF3A3A3A),
+            child: const Center(
+              child: Icon(
+                Icons.image_not_supported,
+                color: Colors.grey,
+                size: 50,
+              ),
+            ),
+          );
+        },
+      );
+    }
   }
 
   Widget _buildLiveArtworkCard(
