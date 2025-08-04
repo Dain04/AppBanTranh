@@ -102,7 +102,11 @@ class _UserOrderScreenState extends State<UserOrderScreen>
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text('Đơn hàng của tôi'),
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Đơn hàng của tôi',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,

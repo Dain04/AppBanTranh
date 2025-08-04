@@ -1,5 +1,4 @@
 import 'package:app_ban_tranh/models/cart.dart';
-import 'package:app_ban_tranh/models/order.dart';
 import 'package:app_ban_tranh/repositories/cart_repository.dart';
 import 'package:app_ban_tranh/screens/info_payment_screen.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +18,7 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Đơn Hàng',
+          'Giỏ hàng',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -30,34 +29,52 @@ class _CartScreenState extends State<CartScreen> {
         iconTheme: const IconThemeData(color: Colors.black),
         automaticallyImplyLeading: false,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: StreamBuilder<List<CartArtworkItem>>(
-          stream: _cartRepository.cartStream,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Lỗi: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('Giỏ hàng trống'));
-            }
-            
-            final cartItems = snapshot.data!;
-            return ListView.builder(
-              itemCount: cartItems.length,
-              itemBuilder: (context, index) {
-                final item = cartItems[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: _buildArtworkCard(context, item),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.network(
+              'https://i.pinimg.com/736x/a3/74/75/a37475abb23c4ceca2f53483e40d8095.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(color: Colors.white.withOpacity(0.6)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: StreamBuilder<List<CartArtworkItem>>(
+              stream: _cartRepository.cartStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Lỗi: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'Giỏ hàng trống!!',
+                      style: TextStyle(
+                          fontSize: 20, color: Color.fromARGB(255, 0, 0, 0)),
+                    ),
+                  );
+                }
+
+                final cartItems = snapshot.data!;
+                return ListView.builder(
+                  itemCount: cartItems.length,
+                  itemBuilder: (context, index) {
+                    final item = cartItems[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: _buildArtworkCard(context, item),
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
+            ),
+          )
+        ],
       ),
-      // Đã xóa phần bottomNavigationBar hiển thị tổng tiền và nút thanh toán tất cả
     );
   }
 
@@ -72,8 +89,7 @@ class _CartScreenState extends State<CartScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color:
-                  Colors.black.withOpacity(0.05), //tạo độ shadow xung quang
+              color: Colors.black.withOpacity(0.05), //tạo độ shadow xung quang
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -155,12 +171,22 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                   //chất liệu
                   Text(
-                    item.material ?? 'N/A',
+                    'Chất liệu: ${(item.material ?? 'N/A')}',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[500],
                     ),
                   ),
+                  //giá
+                  Text(
+                    'Giá: ${(item.price)} VNĐ',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green[700],
+                    ),
+                  ),
+
                   const SizedBox(height: 8),
                   // Đã xóa phần hiển thị giá tiền
                   const SizedBox(height: 8),
@@ -263,7 +289,7 @@ class _CartScreenState extends State<CartScreen> {
       },
     );
   }
-  
+
   @override
   void dispose() {
     _cartRepository.dispose();
