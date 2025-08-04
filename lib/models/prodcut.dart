@@ -7,7 +7,7 @@ class ArtworkItem {
   final String imagePath; //ảnh chính
   final String? material;
   final String? yearcreated; // Năm sáng tác (có thể để null nếu không có)
-  final String? category;
+  final String? genre;
   final List<String> additionalImages; //danh sách ảnh phụ
 
   ArtworkItem({
@@ -18,7 +18,7 @@ class ArtworkItem {
     required this.description, // Mô tả
     required this.imagePath,
     required this.material,
-    required this.category,
+    required this.genre,
     required this.yearcreated, // Năm sáng tác
 
     this.additionalImages = const [],
@@ -36,7 +36,7 @@ final List<ArtworkItem> homenewArtworks = [
     price: 'Price on request',
     material: '',
     yearcreated: '2023', // Năm sáng tác
-    category: 'Cổ điển',
+    genre: 'Cổ điển',
     imagePath: 'assets/images/flowerstyle.jpg',
     description: '', // Mô tả mặc định là rỗng
   ),
@@ -47,7 +47,7 @@ final List<ArtworkItem> homenewArtworks = [
     price: 'Price on request',
     material: '',
     yearcreated: '2023',
-    category: 'Hoa',
+    genre: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
   ),
@@ -58,7 +58,7 @@ final List<ArtworkItem> homenewArtworks = [
     price: 'Price on request',
     material: '',
     yearcreated: '2023',
-    category: 'Hiện đại',
+    genre: 'Hiện đại',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
   ),
@@ -69,7 +69,7 @@ final List<ArtworkItem> homenewArtworks = [
     price: 'Price on request',
     material: '',
     yearcreated: '2023',
-    category: 'Hoa',
+    genre: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
   ),
@@ -85,7 +85,7 @@ final List<ArtworkItem> newArtworks = [
       description:
           'Từ sâu thẳm khu rừng, một bản giao hưởng sắc màu hiện lên, là khúc ca rực rỡ của những loài hoa dại được vẽ nên bằng nét chạm tinh tế. Mỗi đóa hoa như một kiệt tác thu nhỏ, bừng nở sức sống, cánh hoa nhẹ nhàng bung nở tựa đôi cánh lụa mỏng.',
       imagePath: 'assets/images/flowerstyle.jpg',
-      category: 'Hoa',
+      genre: 'Hoa',
       material: 'Acrylic',
       yearcreated: '1980',
       additionalImages: [
@@ -97,7 +97,7 @@ final List<ArtworkItem> newArtworks = [
     title: 'Think',
     artist: 'Doonstrij2',
     price: '140,000,000 VNĐ',
-    category: 'Hoa',
+    genre: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
     yearcreated: '2023',
@@ -108,7 +108,7 @@ final List<ArtworkItem> newArtworks = [
     title: 'Old War',
     artist: 'Rune Quizzter',
     price: '170,670,000 VNĐ',
-    category: 'Văn hoá',
+    genre: 'Văn hoá',
     yearcreated: '2023',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
@@ -119,7 +119,7 @@ final List<ArtworkItem> newArtworks = [
     title: 'Blood Falls',
     artist: 'Doonstrij2',
     yearcreated: '2023',
-    category: 'Chân dung',
+    genre: 'Chân dung',
     price: '10,000,000 VNĐ',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
@@ -130,7 +130,7 @@ final List<ArtworkItem> newArtworks = [
     title: 'Hoa Rừng',
     artist: 'Dain',
     yearcreated: '2020',
-    category: 'Hoa',
+    genre: 'Hoa',
     price: '123,078,000 VNĐ',
     description: 'Vẻ đẹp thời đại của khoản khắt.',
     imagePath: 'assets/images/bh2.jpg',
@@ -147,7 +147,7 @@ final List<ArtworkItem> DauGiaTP = [
       description: 'Tác phẩm nghệ thuật đương đại',
       imagePath: 'assets/images/vam_thien.png',
       material: 'Sơn dầu trên canvas',
-      category: 'Phong cảnh',
+      genre: 'Phong cảnh',
       yearcreated: '2004'),
   ArtworkItem(
       id: '2',
@@ -157,7 +157,7 @@ final List<ArtworkItem> DauGiaTP = [
       description: 'Bức tranh phong cảnh tuyệt đẹp',
       imagePath: 'assets/images/vam_thien.png',
       material: 'Acrylic',
-      category: 'Phong cảnh',
+      genre: 'Phong cảnh',
       yearcreated: '2010'),
 ];
 //dữ liệu mẫu cho phần sản phẩm trong giỏ hàng
@@ -170,7 +170,7 @@ final List<ArtworkItem> GioHang_TP = [
       description: 'Hoa cỏ lá hẹ',
       imagePath: 'assets/images/bh2.jpg',
       material: 'material',
-      category: 'Hoa',
+      genre: 'Hoa',
       yearcreated: '2011'),
   ArtworkItem(
       id: '2',
@@ -180,7 +180,7 @@ final List<ArtworkItem> GioHang_TP = [
       description: 'Hoa cỏ lá hẹ',
       imagePath: 'assets/images/bh2.jpg',
       material: 'material',
-      category: 'Hoa',
+      genre: 'Hoa',
       yearcreated: '2011'),
   ArtworkItem(
       id: '3',
@@ -190,7 +190,7 @@ final List<ArtworkItem> GioHang_TP = [
       description: 'Hoa cỏ lá hẹ',
       imagePath: 'assets/images/bh2.jpg',
       material: 'material',
-      category: 'Hoa',
+      genre: 'Hoa',
       yearcreated: '2011'),
   ArtworkItem(
       id: '4',
@@ -200,7 +200,6 @@ final List<ArtworkItem> GioHang_TP = [
       description: 'Hoa cỏ lá hẹ',
       imagePath: 'assets/images/bh2.jpg',
       material: 'material',
-      category: 'Hoa',
+      genre: 'Hoa',
       yearcreated: '2011'),
-]
-;
+];

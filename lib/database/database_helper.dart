@@ -22,13 +22,13 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, 'app_ban_tranh.db');
-    
+
     // Xóa database cũ nếu tồn tại để đảm bảo schema mới nhất
     if (await File(path).exists()) {
       await File(path).delete();
       print('Đã xóa database cũ');
     }
-    
+
     return await openDatabase(
       path,
       version: 1,
@@ -159,36 +159,40 @@ class DatabaseHelper {
     // Tạo indexes để tối ưu performance
     await db.execute('CREATE INDEX idx_users_email ON users(email)');
     await db.execute('CREATE INDEX idx_users_username ON users(username)');
-    await db.execute('CREATE INDEX idx_sessions_user_id ON user_sessions(user_id)');
-    await db.execute('CREATE INDEX idx_sessions_token ON user_sessions(session_token)');
-    await db.execute('CREATE INDEX idx_products_category ON products(category_id)');
+    await db
+        .execute('CREATE INDEX idx_sessions_user_id ON user_sessions(user_id)');
+    await db.execute(
+        'CREATE INDEX idx_sessions_token ON user_sessions(session_token)');
+    await db
+        .execute('CREATE INDEX idx_products_category ON products(category_id)');
     await db.execute('CREATE INDEX idx_cart_user ON cart_items(user_id)');
     await db.execute('CREATE INDEX idx_orders_user ON orders(user_id)');
   }
 
   // ==================== PASSWORD HASHING ====================
-  
+
   /// Hash password using SHA-256
   String hashPassword(String password) {
     final bytes = utf8.encode('${password}museo_salt_2024'); // Thêm salt
     final digest = sha256.convert(bytes);
     return digest.toString();
   }
-  
+
   /// Verify password
   bool verifyPassword(String password, String hashedPassword) {
     return hashPassword(password) == hashedPassword;
   }
 
   // ==================== PRODUCT METHODS ====================
-  
+
   /// Kiểm tra và đảm bảo cấu trúc bảng products
   Future<void> _ensureProductTableStructure() async {
     try {
       final db = await database;
-      
+
       // Kiểm tra xem bảng products có tồn tại không
-      var tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='products'");
+      var tables = await db.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='products'");
       if (tables.isEmpty) {
         print('Bảng products không tồn tại, đang tạo lại...');
         await db.execute('''
@@ -211,26 +215,29 @@ class DatabaseHelper {
         ''');
         return;
       }
-      
+
       // Kiểm tra cấu trúc của bảng products
       var columns = await db.rawQuery("PRAGMA table_info(products)");
-      
+
       // Kiểm tra từng cột
-      bool hasArtistColumn = columns.any((column) => column['name'] == 'artist');
-      bool hasMaterialColumn = columns.any((column) => column['name'] == 'material');
-      bool hasYearCreatedColumn = columns.any((column) => column['name'] == 'year_created');
-      
+      bool hasArtistColumn =
+          columns.any((column) => column['name'] == 'artist');
+      bool hasMaterialColumn =
+          columns.any((column) => column['name'] == 'material');
+      bool hasYearCreatedColumn =
+          columns.any((column) => column['name'] == 'year_created');
+
       // Thêm các cột nếu chưa tồn tại
       if (!hasArtistColumn) {
         print('Thêm cột artist vào bảng products');
         await db.execute('ALTER TABLE products ADD COLUMN artist TEXT');
       }
-      
+
       if (!hasMaterialColumn) {
         print('Thêm cột material vào bảng products');
         await db.execute('ALTER TABLE products ADD COLUMN material TEXT');
       }
-      
+
       if (!hasYearCreatedColumn) {
         print('Thêm cột year_created vào bảng products');
         await db.execute('ALTER TABLE products ADD COLUMN year_created TEXT');
@@ -241,19 +248,21 @@ class DatabaseHelper {
       await resetDatabase();
     }
   }
-  
+
   /// Thêm một sản phẩm vào database
   Future<int> insertProduct(ArtworkItem artwork) async {
     // Đảm bảo cấu trúc bảng đúng trước khi thêm dữ liệu
     await _ensureProductTableStructure();
-    
+
     final db = await database;
-    
+
     // Chuẩn bị dữ liệu để insert
     Map<String, dynamic> productData = {
       'name': artwork.title,
       'description': artwork.description,
-      'price': double.tryParse(artwork.price.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0,
+      'price':
+          double.tryParse(artwork.price.replaceAll(RegExp(r'[^\d.]'), '')) ??
+              0.0,
       'image_url': artwork.imagePath,
       'artist': artwork.artist,
       'material': artwork.material ?? '',
@@ -264,11 +273,11 @@ class DatabaseHelper {
       'stock_quantity': 1,
       'is_featured': 0,
     };
-    
+
     try {
       // Thêm sản phẩm vào database
       int productId = await db.insert('products', productData);
-      
+
       // Thêm các ảnh phụ (nếu có)
       if (artwork.additionalImages.isNotEmpty) {
         for (String imageUrl in artwork.additionalImages) {
@@ -278,21 +287,21 @@ class DatabaseHelper {
           });
         }
       }
-      
+
       return productId;
     } catch (e) {
       print('Lỗi khi thêm sản phẩm: $e');
       throw e; // Re-throw để caller có thể xử lý
     }
   }
-  
+
   /// Thêm danh sách sản phẩm vào database
   Future<void> insertAllProducts(List<ArtworkItem> artworks) async {
     // Đảm bảo cấu trúc bảng đúng trước khi thêm dữ liệu
     await _ensureProductTableStructure();
-    
+
     final db = await database;
-    
+
     try {
       // Bắt đầu transaction để tối ưu hiệu suất
       await db.transaction((txn) async {
@@ -301,7 +310,9 @@ class DatabaseHelper {
           Map<String, dynamic> productData = {
             'name': artwork.title,
             'description': artwork.description,
-            'price': double.tryParse(artwork.price.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0,
+            'price': double.tryParse(
+                    artwork.price.replaceAll(RegExp(r'[^\d.]'), '')) ??
+                0.0,
             'image_url': artwork.imagePath,
             'artist': artwork.artist,
             'material': artwork.material ?? '',
@@ -312,10 +323,10 @@ class DatabaseHelper {
             'stock_quantity': 1,
             'is_featured': 0,
           };
-          
+
           // Thêm sản phẩm vào database
           int productId = await txn.insert('products', productData);
-          
+
           // Thêm các ảnh phụ (nếu có)
           if (artwork.additionalImages.isNotEmpty) {
             for (String imageUrl in artwork.additionalImages) {
@@ -333,7 +344,7 @@ class DatabaseHelper {
       // Nếu có lỗi, thử xóa và tạo lại database
       print('Đang thử xóa và tạo lại database...');
       await resetDatabase();
-      
+
       // Thử lại một lần nữa
       try {
         final db = await database;
@@ -342,7 +353,9 @@ class DatabaseHelper {
             Map<String, dynamic> productData = {
               'name': artwork.title,
               'description': artwork.description,
-              'price': double.tryParse(artwork.price.replaceAll(RegExp(r'[^\d.]'), '')) ?? 0.0,
+              'price': double.tryParse(
+                      artwork.price.replaceAll(RegExp(r'[^\d.]'), '')) ??
+                  0.0,
               'image_url': artwork.imagePath,
               'artist': artwork.artist,
               'material': artwork.material ?? '',
@@ -353,9 +366,9 @@ class DatabaseHelper {
               'stock_quantity': 1,
               'is_featured': 0,
             };
-            
+
             int productId = await txn.insert('products', productData);
-            
+
             if (artwork.additionalImages.isNotEmpty) {
               for (String imageUrl in artwork.additionalImages) {
                 await txn.insert('product_images', {
@@ -366,26 +379,27 @@ class DatabaseHelper {
             }
           }
         });
-        print('Đã thêm ${artworks.length} sản phẩm vào database sau khi tạo lại');
+        print(
+            'Đã thêm ${artworks.length} sản phẩm vào database sau khi tạo lại');
       } catch (e2) {
         print('Vẫn xảy ra lỗi sau khi tạo lại database: $e2');
         throw e2;
       }
     }
   }
-  
+
   /// Lấy tất cả sản phẩm từ database
   Future<List<ArtworkItem>> getAllProducts() async {
     try {
       final db = await database;
-      
+
       // Lấy tất cả sản phẩm
       final List<Map<String, dynamic>> productMaps = await db.query('products');
-      
+
       if (productMaps.isEmpty) {
         return [];
       }
-      
+
       // Chuyển đổi từ Map sang ArtworkItem
       return Future.wait(productMaps.map((productMap) async {
         // Lấy các ảnh phụ của sản phẩm
@@ -394,9 +408,11 @@ class DatabaseHelper {
           where: 'product_id = ?',
           whereArgs: [productMap['id']],
         );
-        
-        List<String> additionalImages = imageMaps.map((imageMap) => imageMap['image_url'] as String).toList();
-        
+
+        List<String> additionalImages = imageMaps
+            .map((imageMap) => imageMap['image_url'] as String)
+            .toList();
+
         // Tạo đối tượng ArtworkItem
         return ArtworkItem(
           id: productMap['id'].toString(),
@@ -407,7 +423,7 @@ class DatabaseHelper {
           imagePath: productMap['image_url'] ?? '',
           material: productMap['material'],
           yearcreated: productMap['year_created'],
-          category: '', // Sẽ cập nhật sau khi có category
+          genre: '', // Sẽ cập nhật sau khi có category
           additionalImages: additionalImages,
         );
       }).toList());
@@ -416,32 +432,33 @@ class DatabaseHelper {
       return [];
     }
   }
-  
+
   /// Lấy sản phẩm theo ID
   Future<ArtworkItem?> getProductById(String id) async {
     try {
       final db = await database;
-      
+
       // Lấy sản phẩm theo ID
       final List<Map<String, dynamic>> productMaps = await db.query(
         'products',
         where: 'id = ?',
         whereArgs: [id],
       );
-      
+
       if (productMaps.isEmpty) {
         return null;
       }
-      
+
       // Lấy các ảnh phụ của sản phẩm
       final List<Map<String, dynamic>> imageMaps = await db.query(
         'product_images',
         where: 'product_id = ?',
         whereArgs: [id],
       );
-      
-      List<String> additionalImages = imageMaps.map((imageMap) => imageMap['image_url'] as String).toList();
-      
+
+      List<String> additionalImages =
+          imageMaps.map((imageMap) => imageMap['image_url'] as String).toList();
+
       // Tạo đối tượng ArtworkItem
       return ArtworkItem(
         id: productMaps.first['id'].toString(),
@@ -452,7 +469,7 @@ class DatabaseHelper {
         imagePath: productMaps.first['image_url'] ?? '',
         material: productMaps.first['material'],
         yearcreated: productMaps.first['year_created'],
-        category: '', // Sẽ cập nhật sau khi có category
+        genre: '', // Sẽ cập nhật sau khi có category
         additionalImages: additionalImages,
       );
     } catch (e) {
@@ -460,12 +477,13 @@ class DatabaseHelper {
       return null;
     }
   }
-  
+
   /// Kiểm tra xem database đã có sản phẩm chưa
   Future<bool> hasProducts() async {
     try {
       final db = await database;
-      final result = await db.rawQuery('SELECT COUNT(*) as count FROM products');
+      final result =
+          await db.rawQuery('SELECT COUNT(*) as count FROM products');
       int count = Sqflite.firstIntValue(result) ?? 0;
       return count > 0;
     } catch (e) {
@@ -475,7 +493,7 @@ class DatabaseHelper {
   }
 
   // ==================== DATABASE UTILITIES ====================
-  
+
   /// Đóng database
   Future<void> close() async {
     if (_database != null) {
@@ -490,15 +508,15 @@ class DatabaseHelper {
     try {
       // Đóng database nếu đang mở
       await close();
-      
+
       Directory documentsDirectory = await getApplicationDocumentsDirectory();
       String path = join(documentsDirectory.path, 'app_ban_tranh.db');
-      
+
       if (await File(path).exists()) {
         await File(path).delete();
         print('Đã xóa database');
       }
-      
+
       _database = null;
     } catch (e) {
       print('Lỗi khi xóa database: $e');

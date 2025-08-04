@@ -35,10 +35,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final UserRepository _userRepository = UserRepository();
   // Danh sách giỏ hàng (có thể chuyển thành state management sau này)
   final List<String> _cartItems = [];
-  
+
   // Thêm biến để theo dõi tab đang chọn
   int _selectedIndex = 0;
-  
+
   final List<String> images = [
     'assets/images/bh2.jpg',
     'assets/images/bh2.jpg',
@@ -65,27 +65,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (index != _selectedIndex) {
       // Nếu chọn tab khác với tab hiện tại
       final currentUser = await _userRepository.getCurrentUser();
-      
-      if (index == 0) { // Trang chủ
+
+      if (index == 0) {
+        // Trang chủ
         if (currentUser != null) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => HomeScreen(user: currentUser)),
+            MaterialPageRoute(
+                builder: (context) => HomeScreen(user: currentUser)),
           );
         }
-      } else if (index == 1) { // Giỏ hàng
+      } else if (index == 1) {
+        // Giỏ hàng
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const CartScreen()),
         );
-      } else if (index == 2) { // Đơn hàng
+      } else if (index == 2) {
+        // Đơn hàng
         if (currentUser != null) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => UserOrderScreen(userId: currentUser.id)),
+            MaterialPageRoute(
+                builder: (context) => UserOrderScreen(userId: currentUser.id)),
           );
         }
-      } else if (index == 3) { // Cá nhân
+      } else if (index == 3) {
+        // Cá nhân
         if (currentUser != null) {
           Navigator.pushReplacement(
             context,
@@ -106,24 +112,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Lấy sản phẩm từ database theo ID
       final DatabaseHelper dbHelper = DatabaseHelper();
-      
+
       // Kiểm tra xem database đã có sản phẩm chưa
       bool hasProducts = await dbHelper.hasProducts();
-      
+
       if (!hasProducts) {
         // Nếu chưa có sản phẩm, chỉ thêm newArtworks vào database
         print('Đang thêm dữ liệu mẫu newArtworks vào database...');
         await dbHelper.insertAllProducts(newArtworks);
         print('Đã thêm ${newArtworks.length} sản phẩm vào database');
       }
-      
+
       // Lấy sản phẩm từ database theo ID
       currentArtwork = await dbHelper.getProductById(widget.productId);
-      
+
       if (currentArtwork == null) {
         // Nếu không tìm thấy trong database, thử tìm trong dữ liệu cứng (legacy)
         _findArtworkById();
@@ -147,10 +153,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       // Lấy tất cả sản phẩm từ database
       final DatabaseHelper dbHelper = DatabaseHelper();
       List<ArtworkItem> allArtworks = await dbHelper.getAllProducts();
-      
+
       // Lọc các tác phẩm có cùng category và loại bỏ tác phẩm hiện tại
       List<ArtworkItem> similarArtworks = allArtworks.where((artwork) {
-        return artwork.category == currentArtwork!.category &&
+        return artwork.genre == currentArtwork!.genre &&
             artwork.id != currentArtwork!.id;
       }).toList();
 
@@ -159,10 +165,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       return similarArtworks.take(10).toList();
     } catch (e) {
       print('Lỗi khi lấy sản phẩm tương tự: $e');
-      
+
       // Fallback: Sử dụng chỉ newArtworks nếu có lỗi
       List<ArtworkItem> similarArtworks = newArtworks.where((artwork) {
-        return artwork.category == currentArtwork!.category &&
+        return artwork.genre == currentArtwork!.genre &&
             artwork.id != currentArtwork!.id;
       }).toList();
       similarArtworks.shuffle();
@@ -211,36 +217,36 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
 // Cập nhật phương thức _addToCart
-void _addToCart(String id) async {
-  if (currentArtwork != null) {
-    final success = await _cartRepository.addToCart(currentArtwork!);
-    
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Đã thêm "${currentArtwork!.title}" vào giỏ hàng'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-      
-      // Cập nhật số lượng sản phẩm trong giỏ hàng
-      final cartItemCount = await _cartRepository.getCartItemCount();
-      setState(() {
-        _cartItems.clear();
-        for (int i = 0; i < cartItemCount; i++) {
-          _cartItems.add('item');
-        }
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Không thể thêm sản phẩm vào giỏ hàng'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+  void _addToCart(String id) async {
+    if (currentArtwork != null) {
+      final success = await _cartRepository.addToCart(currentArtwork!);
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã thêm "${currentArtwork!.title}" vào giỏ hàng'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        // Cập nhật số lượng sản phẩm trong giỏ hàng
+        final cartItemCount = await _cartRepository.getCartItemCount();
+        setState(() {
+          _cartItems.clear();
+          for (int i = 0; i < cartItemCount; i++) {
+            _cartItems.add('item');
+          }
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Không thể thêm sản phẩm vào giỏ hàng'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
-}
 
   void _onThumbnailTap(int index) {
     setState(() {
@@ -389,7 +395,8 @@ void _addToCart(String id) async {
                               height: 430,
                               decoration: const BoxDecoration(
                                 image: DecorationImage(
-                                  image: AssetImage('assets/images/khunggo.png'),
+                                  image:
+                                      AssetImage('assets/images/khunggo.png'),
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -471,8 +478,9 @@ void _addToCart(String id) async {
                                                   width: isSelected ? 2 : 1,
                                                 ),
                                                 image: DecorationImage(
-                                                  image: AssetImage(currentArtwork!
-                                                      .allImages[index]),
+                                                  image: AssetImage(
+                                                      currentArtwork!
+                                                          .allImages[index]),
                                                   fit: BoxFit.cover,
                                                 ),
                                                 boxShadow: isSelected
@@ -481,8 +489,8 @@ void _addToCart(String id) async {
                                                           color: Colors.black
                                                               .withOpacity(0.2),
                                                           blurRadius: 6,
-                                                          offset:
-                                                              const Offset(0, 2),
+                                                          offset: const Offset(
+                                                              0, 2),
                                                         ),
                                                       ]
                                                     : null,
@@ -496,14 +504,15 @@ void _addToCart(String id) async {
                                 : ListView.builder(
                                     controller: thumbnailScrollController,
                                     scrollDirection: Axis.horizontal,
-                                    padding:
-                                        const EdgeInsets.symmetric(horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
                                     itemCount: currentArtwork!.allImages.length,
                                     itemBuilder: (context, index) {
                                       final isSelected =
                                           index == selectedImageIndex;
                                       return AnimatedContainer(
-                                        duration: const Duration(milliseconds: 200),
+                                        duration:
+                                            const Duration(milliseconds: 200),
                                         curve: Curves.easeInOut,
                                         width: 64,
                                         height: isSelected ? 80 : 64,
@@ -522,8 +531,9 @@ void _addToCart(String id) async {
                                                 width: isSelected ? 2 : 1,
                                               ),
                                               image: DecorationImage(
-                                                image: AssetImage(currentArtwork!
-                                                    .allImages[index]),
+                                                image: AssetImage(
+                                                    currentArtwork!
+                                                        .allImages[index]),
                                                 fit: BoxFit.cover,
                                               ),
                                               boxShadow: isSelected
@@ -532,7 +542,8 @@ void _addToCart(String id) async {
                                                         color: Colors.black
                                                             .withOpacity(0.2),
                                                         blurRadius: 6,
-                                                        offset: const Offset(0, 2),
+                                                        offset:
+                                                            const Offset(0, 2),
                                                       ),
                                                     ]
                                                   : null,
@@ -556,7 +567,8 @@ void _addToCart(String id) async {
                               (index) => Container(
                                 width: 8,
                                 height: 8,
-                                margin: const EdgeInsets.symmetric(horizontal: 3),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 3),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: index == selectedImageIndex
@@ -598,7 +610,8 @@ void _addToCart(String id) async {
                                 ),
                               ),
                               TextSpan(
-                                text: '${_formatPrice(currentArtwork!.price)} VNĐ',
+                                text:
+                                    '${_formatPrice(currentArtwork!.price)} VNĐ',
                                 style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
@@ -757,7 +770,8 @@ void _addToCart(String id) async {
                                     child: Container(
                                       height: 1,
                                       width: 350,
-                                      color: const Color.fromARGB(255, 89, 90, 90),
+                                      color:
+                                          const Color.fromARGB(255, 89, 90, 90),
                                     ),
                                   ),
                                 ),
@@ -782,7 +796,8 @@ void _addToCart(String id) async {
                                     child: Container(
                                       height: 1,
                                       width: 350,
-                                      color: const Color.fromARGB(255, 89, 90, 90),
+                                      color:
+                                          const Color.fromARGB(255, 89, 90, 90),
                                     ),
                                   ),
                                 ),
@@ -792,7 +807,7 @@ void _addToCart(String id) async {
                                   left: 20,
                                   top: 80,
                                   child: Text(
-                                    'Thể loại: ${currentArtwork!.category}',
+                                    'Thể loại: ${currentArtwork!.genre}',
                                     style: const TextStyle(fontSize: 16),
                                   ),
                                 ),
@@ -807,7 +822,8 @@ void _addToCart(String id) async {
                                     child: Container(
                                       height: 1,
                                       width: 350,
-                                      color: const Color.fromARGB(255, 89, 90, 90),
+                                      color:
+                                          const Color.fromARGB(255, 89, 90, 90),
                                     ),
                                   ),
                                 ),
@@ -855,18 +871,20 @@ void _addToCart(String id) async {
                                           margin: const EdgeInsets.only(
                                               right: 8, bottom: 8),
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             boxShadow: [
                                               BoxShadow(
-                                                color:
-                                                    Colors.black.withOpacity(0.1),
+                                                color: Colors.black
+                                                    .withOpacity(0.1),
                                                 blurRadius: 4,
                                                 offset: const Offset(0, 2),
                                               ),
                                             ],
                                           ),
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             child: Image.asset(
                                               images[groupIndex * 4],
                                               fit: BoxFit.cover,
@@ -879,20 +897,23 @@ void _addToCart(String id) async {
                                         Container(
                                           width: 180,
                                           height: 115,
-                                          margin: const EdgeInsets.only(bottom: 8),
+                                          margin:
+                                              const EdgeInsets.only(bottom: 8),
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             boxShadow: [
                                               BoxShadow(
-                                                color:
-                                                    Colors.black.withOpacity(0.1),
+                                                color: Colors.black
+                                                    .withOpacity(0.1),
                                                 blurRadius: 4,
                                                 offset: const Offset(0, 2),
                                               ),
                                             ],
                                           ),
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             child: Image.asset(
                                               images[groupIndex * 4 + 1],
                                               fit: BoxFit.cover,
@@ -910,20 +931,23 @@ void _addToCart(String id) async {
                                         Container(
                                           width: 180,
                                           height: 115,
-                                          margin: const EdgeInsets.only(right: 8),
+                                          margin:
+                                              const EdgeInsets.only(right: 8),
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             boxShadow: [
                                               BoxShadow(
-                                                color:
-                                                    Colors.black.withOpacity(0.1),
+                                                color: Colors.black
+                                                    .withOpacity(0.1),
                                                 blurRadius: 4,
                                                 offset: const Offset(0, 2),
                                               ),
                                             ],
                                           ),
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             child: Image.asset(
                                               images[groupIndex * 4 + 2],
                                               fit: BoxFit.cover,
@@ -937,18 +961,20 @@ void _addToCart(String id) async {
                                           width: 120,
                                           height: 115,
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             boxShadow: [
                                               BoxShadow(
-                                                color:
-                                                    Colors.black.withOpacity(0.1),
+                                                color: Colors.black
+                                                    .withOpacity(0.1),
                                                 blurRadius: 4,
                                                 offset: const Offset(0, 2),
                                               ),
                                             ],
                                           ),
                                           child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                             child: Image.asset(
                                               images[groupIndex * 4 + 3],
                                               fit: BoxFit.cover,
@@ -1001,7 +1027,6 @@ void _addToCart(String id) async {
                             color: const Color.fromARGB(255, 89, 90, 90),
                           ),
                         ),
-                      
                       ),
                       const SizedBox(height: 30),
 
@@ -1023,8 +1048,10 @@ void _addToCart(String id) async {
                       FutureBuilder<List<ArtworkItem>>(
                         future: _getSimilarArtworks(),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
                           } else if (snapshot.hasError) {
                             return Center(
                               child: Text(
@@ -1032,7 +1059,8 @@ void _addToCart(String id) async {
                                 style: const TextStyle(color: Colors.red),
                               ),
                             );
-                          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
                             return const Center(
                               child: Text(
                                 'Không có sản phẩm tương tự',
@@ -1047,13 +1075,16 @@ void _addToCart(String id) async {
                             return GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
                                 crossAxisSpacing: 16,
                                 mainAxisSpacing: 16,
                                 childAspectRatio: 0.75,
                               ),
-                              itemCount: similarArtworks.length > 6 ? 6 : similarArtworks.length,
+                              itemCount: similarArtworks.length > 6
+                                  ? 6
+                                  : similarArtworks.length,
                               itemBuilder: (context, index) {
                                 final artwork = similarArtworks[index];
                                 return _buildSimilarProduct(artwork);
@@ -1151,7 +1182,7 @@ Widget _buildSimilarProduct(ArtworkItem artwork) {
                   ),
                 ),
               ),
-              
+
               // Thông tin sản phẩm
               Expanded(
                 flex: 2,
@@ -1180,7 +1211,7 @@ Widget _buildSimilarProduct(ArtworkItem artwork) {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      
+
                       // Tác giả
                       Text(
                         'Tác giả: ${artwork.artist}',
@@ -1191,7 +1222,7 @@ Widget _buildSimilarProduct(ArtworkItem artwork) {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      
+
                       // Giá - Sử dụng hàm _formatPrice cho sản phẩm tương tự
                       Text(
                         '${_formatPrice(artwork.price)} VNĐ',
@@ -1225,13 +1256,13 @@ String _formatPrice(String price) {
           );
     }
   }
-  
+
   // Xử lý trường hợp giá đã có định dạng VNĐ
   if (price.contains('VNĐ')) {
     String priceStr = price.replaceAll('VNĐ', '').trim();
     return priceStr;
   }
-  
+
   // Xử lý các trường hợp khác
   if (price != 'Price on request') {
     String priceStr = price.replaceAll('.', '').replaceAll(',', '');
@@ -1243,8 +1274,7 @@ String _formatPrice(String price) {
           );
     }
   }
-  
+
   // Trả về giá gốc nếu không xử lý được
   return price;
 }
-

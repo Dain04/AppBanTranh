@@ -5,6 +5,7 @@ import 'package:app_ban_tranh/models/prodcut.dart';
 import 'package:app_ban_tranh/models/galleries.dart';
 import 'package:app_ban_tranh/screens/Live_screen.dart';
 import 'package:app_ban_tranh/screens/auction_screen.dart';
+import 'package:app_ban_tranh/screens/productdetail_screen.dart';
 import 'package:app_ban_tranh/screens/productpage_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/screens/galleriespage_screen.dart';
@@ -1005,20 +1006,33 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Hiển thị hình ảnh tác phẩm nghệ thuật
-          Container(
-            height: 180,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-              image: DecorationImage(
-                image: AssetImage(artwork.imagePath),
-                fit: BoxFit.cover,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailScreen(
+                    productId: artwork.id,
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              height: 180,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+                image: DecorationImage(
+                  image: AssetImage(artwork.imagePath),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
+
           // Nội dung bên dưới hình ảnh
           Expanded(
             child: Padding(

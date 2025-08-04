@@ -1,4 +1,5 @@
 // lib/screens/productpage_screen.dart
+import 'package:app_ban_tranh/models/genre.dart';
 import 'package:app_ban_tranh/screens/productdetail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
@@ -39,7 +40,7 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
 
     // Kiểm tra xem database đã có sản phẩm chưa
     bool hasProducts = await _databaseHelper.hasProducts();
-    
+
     if (!hasProducts) {
       // Nếu chưa có sản phẩm, thêm dữ liệu mẫu từ product.dart
       await _databaseHelper.insertAllProducts([
@@ -49,10 +50,10 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
         // ...GioHang_TP
       ]);
     }
-    
+
     // Lấy tất cả sản phẩm từ database
     _products = await _databaseHelper.getAllProducts();
-    
+
     setState(() {
       _isLoading = false;
     });
@@ -63,27 +64,33 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
     if (index != _selectedIndex) {
       // Nếu chọn tab khác với tab hiện tại
       final currentUser = await _userRepository.getCurrentUser();
-      
-      if (index == 0) { // Trang chủ
+
+      if (index == 0) {
+        // Trang chủ
         if (currentUser != null) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => HomeScreen(user: currentUser)),
+            MaterialPageRoute(
+                builder: (context) => HomeScreen(user: currentUser)),
           );
         }
-      } else if (index == 1) { // Giỏ hàng
+      } else if (index == 1) {
+        // Giỏ hàng
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const CartScreen()),
         );
-      } else if (index == 2) { // Đơn hàng
+      } else if (index == 2) {
+        // Đơn hàng
         if (currentUser != null) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => UserOrderScreen(userId: currentUser.id)),
+            MaterialPageRoute(
+                builder: (context) => UserOrderScreen(userId: currentUser.id)),
           );
         }
-      } else if (index == 3) { // Cá nhân
+      } else if (index == 3) {
+        // Cá nhân
         if (currentUser != null) {
           Navigator.pushReplacement(
             context,
@@ -121,114 +128,110 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
           ),
         ],
       ),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Search Box
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Tìm kiếm',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                          color: const Color.fromARGB(255, 52, 51, 51),
-                          width: 1.0),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                  ),
-                  onChanged: (value) {
-                    print('Tìm kiếm: $value');
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Artwork Categories Section
-                Column(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-                      child: Text(
-                        'Artwork in type',
-                        style:
-                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 150,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildCategoryItem(
-                                'Flower', 'assets/images/flowerstyle.jpg'),
-                            _buildCategoryItem(
-                                'Classic', 'assets/images/classisctyle.jpg'),
-                            _buildCategoryItem(
-                                'Modern', 'assets/images/modernstyle.jpg'),
-                            _buildCategoryItem(
-                                'Scene', 'assets/images/scene.jpg'),
-                            _buildCategoryItem(
-                                'Portrait', 'assets/images/portrait.jpg'),
-                            _buildCategoryItem(
-                                'Cultural', 'assets/images/Cultural.jpg')
-                          ],
+                    // Search Box
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Tìm kiếm',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                              color: const Color.fromARGB(255, 52, 51, 51),
+                              width: 1.0),
                         ),
+                        filled: true,
+                        fillColor: Colors.grey[200],
                       ),
+                      onChanged: (value) {
+                        print('Tìm kiếm: $value');
+                      },
                     ),
+                    const SizedBox(height: 20),
+
+                    // Artwork Categories Section
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 8),
+                          child: Text(
+                            'Thể loại nghệ thuật',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 150,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: homeGalleries.map((genre) {
+                                return _buildCategoryItem(
+                                    genre.name, genre.imagePath);
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+
+                    //___________________________________new artwork section_________________________
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Tác phẩm mới',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                // dòng kẻ màu xanh
+                                Container(
+                                  height: 3,
+                                  width: 120,
+                                  color: Colors.blue,
+                                ),
+                              ]),
+                          const SizedBox(height: 20),
+
+                          /// Danh sách các tác phẩm nghệ thuật từ database
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16.0,
+                              mainAxisSpacing: 16.0,
+                              childAspectRatio: 0.55,
+                            ),
+                            itemCount: _products.length,
+                            itemBuilder: (context, index) {
+                              return _buildArtworkCard(
+                                  context, _products[index]);
+                            },
+                          )
+                        ])
                   ],
                 ),
-                const SizedBox(height: 30),
-
-                //___________________________________new artwork section_________________________
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text(
-                      'New Artwork',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    // dòng kẻ màu xanh
-                    Container(
-                      height: 3,
-                      width: 120,
-                      color: Colors.blue,
-                    ),
-                  ]),
-                  const SizedBox(height: 20),
-
-                  /// Danh sách các tác phẩm nghệ thuật từ database
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16.0,
-                      mainAxisSpacing: 16.0,
-                      childAspectRatio: 0.55,
-                    ),
-                    itemCount: _products.length,
-                    itemBuilder: (context, index) {
-                      return _buildArtworkCard(context, _products[index]);
-                    },
-                  )
-                ])
-              ],
+              ),
             ),
-          ),
-        ),
       // Thêm BottomNavigationBar giống như trong main_screen.dart
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -360,13 +363,13 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
                   const SizedBox(height: 8),
                   //Nút xem chi tiết và nút thêm vào giỏ hàng
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       SizedBox(
-                        width: 155, // Đặt chiều rộng cố định cho nút
+                        width: 146, // Đặt chiều rộng cố định cho nút
                         height: 32,
                         child: OutlinedButton(
                           onPressed: () {
-                            // Navigation đến ProductDetailScreen với productId
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -462,13 +465,13 @@ String _formatPrice(String price) {
           );
     }
   }
-  
+
   // Xử lý trường hợp giá đã có định dạng VNĐ
   if (price.contains('VNĐ')) {
     String priceStr = price.replaceAll('VNĐ', '').trim();
     return priceStr;
   }
-  
+
   // Xử lý các trường hợp khác
   if (price != 'Price on request') {
     String priceStr = price.replaceAll('.', '').replaceAll(',', '');
@@ -480,7 +483,7 @@ String _formatPrice(String price) {
           );
     }
   }
-  
+
   // Trả về giá gốc nếu không xử lý được
   return price;
 }
