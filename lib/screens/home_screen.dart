@@ -5,6 +5,7 @@ import 'package:app_ban_tranh/models/prodcut.dart';
 import 'package:app_ban_tranh/models/galleries.dart';
 import 'package:app_ban_tranh/screens/Live_screen.dart';
 import 'package:app_ban_tranh/screens/auction_screen.dart';
+import 'package:app_ban_tranh/models/auction.dart';
 import 'package:app_ban_tranh/screens/blog_screen.dart';
 import 'package:app_ban_tranh/screens/productdetail_screen.dart';
 import 'package:app_ban_tranh/screens/productpage_screen.dart';
@@ -443,25 +444,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Container(
-                      height: 380,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        itemCount: DauGiaTP.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            width: 270,
-                            margin: const EdgeInsets.only(right: 16.0),
-                            child: _buildAuctionArtworkCard(
-                              DauGiaTP[index],
-                              context,
-                            ),
-                          );
-                        },
-                      ),
+                  Container(
+                    height: 380,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      itemCount: auctionArtworks.length > 3
+                          ? 3
+                          : auctionArtworks.length, // Hiển thị tối đa 3 item
+                      itemBuilder: (context, index) {
+                        return Container(
+                          width: 270,
+                          margin: const EdgeInsets.only(right: 16.0),
+                          child: _buildAuctionCard(
+                            auctionArtworks[index],
+                            context,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 70),
@@ -1042,6 +1042,204 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildAuctionCard(
+    AuctionItem auction,
+    BuildContext context,
+  ) {
+    final status = getAuctionStatus(auction);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.orange.withOpacity(0.5),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.orange.withOpacity(0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Hình ảnh với badge trạng thái
+          Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Container(
+              height: 220,
+              width: double.infinity,
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: AssetImage(auction.imagePath),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  // Badge trạng thái đấu giá
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getAuctionStatusColor(status),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _getAuctionStatusText(status),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Badge số lượt đấu giá (chỉ hiện khi đang active)
+                  if (status == AuctionStatus.active)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '${auction.totalBids} lượt',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Thông tin đấu giá
+          Expanded(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        auction.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Nghệ sĩ: ${auction.artist}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      // Hiển thị giá theo trạng thái
+                      if (status == AuctionStatus.active) ...[
+                        Text(
+                          'Giá hiện tại: ${auction.currentPrice} VNĐ',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Colors.green,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Còn lại: ${_formatTimeRemaining(auction)}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ] else if (status == AuctionStatus.upcoming) ...[
+                        Text(
+                          'Giá khởi điểm: ${auction.startingPrice} VNĐ',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Bắt đầu: ${_formatStartTime(auction)}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ] else ...[
+                        Text(
+                          'Giá cuối: ${auction.currentPrice} VNĐ',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Người thắng: ${auction.highestBidder ?? "N/A"}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHomeArtworkCard(
     ArtworkItem artwork,
     BuildContext context,
@@ -1152,4 +1350,48 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
+
+Color _getAuctionStatusColor(AuctionStatus status) {
+  switch (status) {
+    case AuctionStatus.active:
+      return Colors.green;
+    case AuctionStatus.upcoming:
+      return Colors.blue;
+    case AuctionStatus.completed:
+      return Colors.grey;
+  }
+}
+
+String _getAuctionStatusText(AuctionStatus status) {
+  switch (status) {
+    case AuctionStatus.active:
+      return 'ĐANG DIỄN RA';
+    case AuctionStatus.upcoming:
+      return 'SẮP DIỄN RA';
+    case AuctionStatus.completed:
+      return 'ĐÃ KẾT THÚC';
+  }
+}
+
+String _formatTimeRemaining(AuctionItem auction) {
+  final remaining = auction.timeRemaining;
+  if (remaining == Duration.zero) return 'Đã kết thúc';
+
+  final days = remaining.inDays;
+  final hours = remaining.inHours % 24;
+  final minutes = remaining.inMinutes % 60;
+
+  if (days > 0) {
+    return '$days ngày $hours giờ';
+  } else if (hours > 0) {
+    return '$hours giờ $minutes phút';
+  } else {
+    return '$minutes phút';
+  }
+}
+
+String _formatStartTime(AuctionItem auction) {
+  final startTime = auction.startTime;
+  return '${startTime.day.toString().padLeft(2, '0')}/${startTime.month.toString().padLeft(2, '0')} ${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}';
 }

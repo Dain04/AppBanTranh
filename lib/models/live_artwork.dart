@@ -21,20 +21,22 @@ class ArtworkLive {
 final List<ArtworkLive> artworklive = [
   ArtworkLive(
     idartlive: '1',
-    nameartlive: 'T-Hun',
-    date_start: '2023-10-01',
-    time_start: '19h',
-    time_end: '21h',
+    nameartlive: 'Hơi thở của Lá',
+    date_start: '2025-09-15',
+    time_start: '18:00',
+    time_end: '20:00',
     imagePath: 'assets/images/gallery3.jpg',
-    description: 'Như là 1 thể của lá',
+    description:
+        'Buổi biểu diễn tranh sống động, nơi tác phẩm được hoàn thiện ngay trước mắt khán giả, thể hiện vòng đời của một chiếc lá chuyển mình qua các mùa.',
   ),
   ArtworkLive(
     idartlive: '2',
-    nameartlive: 'Art Gallery 2',
-    date_start: '2023-11-01',
-    time_start: '19h',
-    time_end: '21h',
-    imagePath: 'assets/images/gallery3.jpg',
-    description: 'A collection of modern art pieces from renowned artists.',
+    nameartlive: 'Ánh Sáng và Cảm Xúc',
+    date_start: '2025-10-05',
+    time_start: '19:00',
+    time_end: '21:30',
+    imagePath: 'assets/images/liv1.jpg',
+    description:
+        'Triển lãm tương tác kết hợp ánh sáng và hội họa trực tiếp, khám phá cảm xúc con người thông qua từng nét cọ sống động.',
   ),
 ];
