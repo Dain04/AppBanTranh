@@ -181,14 +181,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    '${_formatPrice(item.price.toString())} VNĐ', // Chuyển đổi double thành String
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                  ),
+
                 ],
               ),
             ),

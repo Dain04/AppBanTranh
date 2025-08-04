@@ -35,7 +35,7 @@ final List<ArtworkItem> homenewArtworks = [
     artist: 'LT Nghiax',
     price: '100,000,000',
     material: '',
-    yearcreated: '2023', // Năm sáng tác
+    yearcreated: '1970', // Năm sáng tác
     genre: 'Cổ điển',
     imagePath: 'assets/images/flowerstyle.jpg',
     description: '', // Mô tả mặc định là rỗng
@@ -46,7 +46,7 @@ final List<ArtworkItem> homenewArtworks = [
     artist: 'Doonstrij2',
     price: '140,000,000',
     material: '',
-    yearcreated: '2023',
+    yearcreated: '2000',
     genre: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
@@ -57,7 +57,7 @@ final List<ArtworkItem> homenewArtworks = [
     artist: 'Rune Quizzter',
     price: '170,670,000',
     material: '',
-    yearcreated: '2023',
+    yearcreated: '1980',
     genre: 'Hiện đại',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
@@ -65,10 +65,10 @@ final List<ArtworkItem> homenewArtworks = [
   ArtworkItem(
     id: '4',
     title: 'Blood Falls',
-    artist: 'Doonstrij2',
+    artist: 'MinKjar',
     price: '10,000,000',
     material: '',
-    yearcreated: '2023',
+    yearcreated: '2025',
     genre: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
@@ -98,7 +98,7 @@ final List<ArtworkItem> newArtworks = [
       imagePath: 'assets/images/flowerstyle.jpg',
       genre: 'Hoa',
       material: 'Acrylic',
-      yearcreated: '1980',
+      yearcreated: '1970',
       additionalImages: [
         'assets/images/bh1.jpg',
         'assets/images/bh2.jpg',
@@ -111,7 +111,7 @@ final List<ArtworkItem> newArtworks = [
     genre: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
-    yearcreated: '2023',
+    yearcreated: '2000',
     material: '',
   ),
   ArtworkItem(
@@ -120,7 +120,7 @@ final List<ArtworkItem> newArtworks = [
     artist: 'Rune Quizzter',
     price: '170,670,000',
     genre: 'Văn hoá',
-    yearcreated: '2023',
+    yearcreated: '1980',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
     material: '',
@@ -128,8 +128,8 @@ final List<ArtworkItem> newArtworks = [
   ArtworkItem(
     id: '9',
     title: 'Blood Falls',
-    artist: 'Doonstrij2',
-    yearcreated: '2023',
+    artist: 'MinKjar',
+    yearcreated: '2025',
     genre: 'Chân dung',
     price: '10,000,000',
     description: 'A powerful piece depicting the struggles of war.',
