@@ -3,6 +3,7 @@ import 'package:app_ban_tranh/screens/product_for_category_screen.dart';
 import 'package:app_ban_tranh/screens/cart_screen.dart';
 import 'package:app_ban_tranh/screens/home_screen.dart';
 import 'package:app_ban_tranh/screens/order_screen.dart';
+import 'package:app_ban_tranh/screens/productpage_screen.dart';
 import 'package:app_ban_tranh/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:app_ban_tranh/models/prodcut.dart';
@@ -34,10 +35,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final FavoriteRepository _favoriteRepository = FavoriteRepository();
   final CartRepository _cartRepository = CartRepository();
   final UserRepository _userRepository = UserRepository();
-  
+
   // Biến để theo dõi trạng thái yêu thích của sản phẩm hiện tại
   bool _isCurrentArtworkFavorite = false;
-  
+
   // Danh sách giỏ hàng (có thể chuyển thành state management sau này)
   final List<String> _cartItems = [];
 
@@ -138,12 +139,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         // Nếu không tìm thấy trong database, thử tìm trong dữ liệu cứng (legacy)
         _findArtworkById();
       }
-      
+
       // Kiểm tra trạng thái yêu thích của sản phẩm hiện tại
       if (currentArtwork != null) {
-        _isCurrentArtworkFavorite = await _favoriteRepository.isFavorite(currentArtwork!.id);
+        _isCurrentArtworkFavorite =
+            await _favoriteRepository.isFavorite(currentArtwork!.id);
       }
-      
+
       // Lấy số lượng sản phẩm trong giỏ hàng
       final cartItemCount = await _cartRepository.getCartItemCount();
       _cartItems.clear();
@@ -215,17 +217,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   // Hàm toggle trạng thái yêu thích
   Future<void> _toggleFavorite(String id) async {
     final success = await _favoriteRepository.toggleFavorite(id);
-    
+
     if (success) {
       setState(() {
         _isCurrentArtworkFavorite = !_isCurrentArtworkFavorite;
       });
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isCurrentArtworkFavorite 
-            ? 'Đã thêm vào danh sách yêu thích' 
-            : 'Đã xóa khỏi danh sách yêu thích'),
+          content: Text(_isCurrentArtworkFavorite
+              ? 'Đã thêm vào danh sách yêu thích'
+              : 'Đã xóa khỏi danh sách yêu thích'),
           duration: const Duration(seconds: 1),
         ),
       );
@@ -299,7 +301,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Back'),
+        title: const Text('Trở lại'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, size: 30),
           onPressed: () {
@@ -854,7 +856,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Bộ sưu tập nổi bật',
+                          'Tác phẩm nổi bật khác',
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -864,7 +866,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Horizontal StaggeredGridView - Same height, different widths
                       SizedBox(
                         height: 250,
                         child: ListView.builder(
@@ -881,58 +882,79 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     children: [
                                       // Ảnh ngắn
                                       if (groupIndex * 4 < images.length)
-                                        Container(
-                                          width: 120,
-                                          height: 115,
-                                          margin: const EdgeInsets.only(
-                                              right: 8, bottom: 8),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.1),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const ProductPageScreen(),
                                               ),
-                                            ],
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.asset(
-                                              images[groupIndex * 4],
-                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                          child: Container(
+                                            width: 120,
+                                            height: 115,
+                                            margin: const EdgeInsets.only(
+                                                right: 8, bottom: 8),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.1),
+                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.asset(
+                                                images[groupIndex * 4],
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         ),
-
                                       // Ảnh dài
                                       if (groupIndex * 4 + 1 < images.length)
-                                        Container(
-                                          width: 180,
-                                          height: 115,
-                                          margin:
-                                              const EdgeInsets.only(bottom: 8),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.1),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const ProductPageScreen(),
                                               ),
-                                            ],
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.asset(
-                                              images[groupIndex * 4 + 1],
-                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                          child: Container(
+                                            width: 180,
+                                            height: 115,
+                                            margin: const EdgeInsets.only(
+                                                bottom: 8),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.1),
+                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.asset(
+                                                images[groupIndex * 4 + 1],
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -944,56 +966,77 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     children: [
                                       // Ảnh dài
                                       if (groupIndex * 4 + 2 < images.length)
-                                        Container(
-                                          width: 180,
-                                          height: 115,
-                                          margin:
-                                              const EdgeInsets.only(right: 8),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.1),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const ProductPageScreen(),
                                               ),
-                                            ],
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.asset(
-                                              images[groupIndex * 4 + 2],
-                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                          child: Container(
+                                            width: 180,
+                                            height: 115,
+                                            margin:
+                                                const EdgeInsets.only(right: 8),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.1),
+                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.asset(
+                                                images[groupIndex * 4 + 2],
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         ),
-
                                       // Ảnh ngắn
                                       if (groupIndex * 4 + 3 < images.length)
-                                        Container(
-                                          width: 120,
-                                          height: 115,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.1),
-                                                blurRadius: 4,
-                                                offset: const Offset(0, 2),
+                                        GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const ProductPageScreen(),
                                               ),
-                                            ],
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.asset(
-                                              images[groupIndex * 4 + 3],
-                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                          child: Container(
+                                            width: 120,
+                                            height: 115,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.1),
+                                                  blurRadius: 4,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.asset(
+                                                images[groupIndex * 4 + 3],
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -1010,13 +1053,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         alignment: Alignment.center,
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/collection');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ProductPageScreen(),
+                              ),
+                            );
                           },
                           child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Xem thêm bộ sưu tập',
+                                'Xem thêm tác phẩm',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Color.fromARGB(255, 107, 108, 109),
@@ -1030,6 +1078,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                         ),
                       ),
+
                       const SizedBox(height: 1),
 
                       // Dòng kẻ
