@@ -293,7 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(12),
                             child: Stack(
                               children: [
-                                // Hình ảnh phòng trưng bày  - full height
+                                // Hình ảnh phòng trưng bày - full height
                                 Container(
                                   height: double.infinity,
                                   width: double.infinity,
@@ -331,27 +331,48 @@ class _HomeScreenState extends State<HomeScreen> {
                                           CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text(
-                                          gallery.namegallery,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                            color: Colors.white,
+                                        // Title và Location trong một container trắng
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12.0,
+                                            vertical: 8.0,
                                           ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          gallery.location,
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            color: Colors.white70,
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.white.withOpacity(0.9),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                gallery.namegallery,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                  color: Colors.black87,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                gallery.location,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                        const SizedBox(height: 6),
+                                        const SizedBox(height: 8),
+                                        // Date trong container riêng biệt
                                         Container(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 8.0,
@@ -710,7 +731,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-// Helper method để xử lý việc tải ảnh cho card
   Widget _buildImageForCard(String imagePath) {
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       // Nếu là URL thì dùng Image.network
