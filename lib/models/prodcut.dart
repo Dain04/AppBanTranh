@@ -160,46 +160,4 @@ final List<ArtworkItem> DauGiaTP = [
       genre: 'Phong cảnh',
       yearcreated: '2010'),
 ];
-//dữ liệu mẫu cho phần sản phẩm trong giỏ hàng
-final List<ArtworkItem> GioHang_TP = [
-  ArtworkItem(
-      id: '1',
-      title: 'Chạng Vạn',
-      artist: 'NghiaLT',
-      price: '1,500,000',
-      description: 'Hoa cỏ lá hẹ',
-      imagePath: 'assets/images/bh2.jpg',
-      material: 'material',
-      genre: 'Hoa',
-      yearcreated: '2011'),
-  ArtworkItem(
-      id: '2',
-      title: 'Chạng Vạn',
-      artist: 'NghiaLT',
-      price: '32,000,000',
-      description: 'Hoa cỏ lá hẹ',
-      imagePath: 'assets/images/bh2.jpg',
-      material: 'material',
-      genre: 'Hoa',
-      yearcreated: '2011'),
-  ArtworkItem(
-      id: '3',
-      title: 'Chạng Vạn',
-      artist: 'NghiaLT',
-      price: '25,000,000',
-      description: 'Hoa cỏ lá hẹ',
-      imagePath: 'assets/images/bh2.jpg',
-      material: 'material',
-      genre: 'Hoa',
-      yearcreated: '2011'),
-  ArtworkItem(
-      id: '4',
-      title: 'Chạng Vạn',
-      artist: 'NghiaLT',
-      price: '52,000,000',
-      description: 'Hoa cỏ lá hẹ',
-      imagePath: 'assets/images/bh2.jpg',
-      material: 'material',
-      genre: 'Hoa',
-      yearcreated: '2011'),
-];
+

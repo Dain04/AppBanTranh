@@ -23,7 +23,6 @@ class DataInitializer {
         ...homenewArtworks,
         ...newArtworks,
         ...DauGiaTP,
-        ...GioHang_TP
       ]);
       
       print('Đã khởi tạo dữ liệu sản phẩm');

@@ -1,6 +1,9 @@
+// lib/screens/profile_screen.dart
 import 'package:app_ban_tranh/models/prodcut.dart';
 import 'package:app_ban_tranh/models/user.dart';
 import 'package:app_ban_tranh/screens/user_info_screen.dart';
+import 'package:app_ban_tranh/screens/productdetail_screen.dart';
+import 'package:app_ban_tranh/repositories/favorite_repository.dart';
 import 'package:flutter/material.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -20,18 +23,53 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final FavoriteRepository _favoriteRepository = FavoriteRepository();
+  
+  // Danh sách ID tác phẩm yêu thích
+  List<String> _favoriteIds = [];
+  
+  // Danh sách tác phẩm yêu thích
+  List<ArtworkItem> _favoriteArtworks = [];
+  
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
+    _loadFavorites();
   }
 
-  // Danh sách ID tác phẩm yêu thích
-  List<String> _favoriteIds = [];
+  // Phương thức tải danh sách yêu thích
+  Future<void> _loadFavorites() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      // Lấy danh sách ID yêu thích
+      _favoriteIds = await _favoriteRepository.getFavoriteIds();
+      
+      // Lọc ra các tác phẩm yêu thích từ tất cả tác phẩm
+      _favoriteArtworks = _allArtworks
+          .where((artwork) => _favoriteIds.contains(artwork.id))
+          .toList();
+    } catch (e) {
+      print('Lỗi khi tải danh sách yêu thích: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
-  // Danh sách tác phẩm trong bộ sưu tập (copy từ dữ liệu gốc)
-  List<ArtworkItem> _collectionItems = List.from(GioHang_TP);
+  // Danh sách tất cả tác phẩm có thể yêu thích
+  List<ArtworkItem> get _allArtworks {
+    List<ArtworkItem> allItems = [];
+    allItems.addAll(homenewArtworks);
+    allItems.addAll(newArtworks);
+    return allItems;
+  }
 
   // Hàm kiểm tra tác phẩm có được yêu thích không
   bool _isFavorite(String id) {
@@ -39,53 +77,12 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   // Hàm toggle trạng thái yêu thích
-  void _toggleFavorite(String id) {
-    setState(() {
-      if (_favoriteIds.contains(id)) {
-        _favoriteIds.remove(id);
-      } else {
-        _favoriteIds.add(id);
-      }
-    });
-  }
-
-  // Hàm xóa item khỏi bộ sưu tập
-  void _removeFromCollection(String id) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Xác nhận xóa'),
-          content: const Text(
-              'Bạn có chắc chắn muốn xóa tác phẩm này khỏi bộ sưu tập?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Hủy'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _collectionItems.removeWhere((item) => item.id == id);
-                  // Cũng xóa khỏi danh sách yêu thích nếu có
-                  _favoriteIds.remove(id);
-                });
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Đã xóa tác phẩm khỏi bộ sưu tập'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-              child: const Text('Xóa', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        );
-      },
-    );
+  Future<void> _toggleFavorite(String id) async {
+    final success = await _favoriteRepository.toggleFavorite(id);
+    
+    if (success) {
+      await _loadFavorites(); // Tải lại danh sách sau khi thay đổi
+    }
   }
 
   @override
@@ -169,7 +166,6 @@ class _ProfileScreenState extends State<ProfileScreen>
             color: Colors.white,
             child: TabBar(
               tabs: const [
-                Tab(text: 'Giỏ hàng của tôi'),
                 Tab(text: 'Mục yêu thích của tôi'),
               ],
               controller: _tabController,
@@ -188,9 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                // Tab 1: Giỏ hàng của tôi
-                _buildCartTab(),
-                // Tab 2: Mục yêu thích của tôi
+                // Tab: Mục yêu thích của tôi
                 _buildFavoritesTab(),
               ],
             ),
@@ -200,69 +194,13 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  // Widget cho tab "Giỏ hàng của tôi"
-  Widget _buildCartTab() {
-    if (_collectionItems.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.collections,
-              size: 80,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Giỏ hàng trống',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Hãy xem và thêm tác phẩm vào giỏ hàng!',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, //2 cột
-        crossAxisSpacing: 16, //khoảng cách giữa các cột
-        mainAxisSpacing: 16, //khoảng cách giữa các hàng
-        childAspectRatio: 0.7, //tỉ lệ chiều cao ,dài của mỗi item
-      ),
-      itemCount: _collectionItems.length,
-      itemBuilder: (context, index) {
-        return _buildArtworkCard(
-          _collectionItems[index],
-          context,
-          _isFavorite,
-          _toggleFavorite,
-          _removeFromCollection,
-          showDeleteButton: true, // Hiển thị nút xóa cho tab bộ sưu tập
-        );
-      },
-    );
-  }
-
   // Widget cho tab "Mục yêu thích của tôi"
   Widget _buildFavoritesTab() {
-    // Lọc ra những tác phẩm được yêu thích từ bộ sưu tập hiện tại
-    List<ArtworkItem> favoriteArtworks = _collectionItems
-        .where((artwork) => _favoriteIds.contains(artwork.id))
-        .toList();
-
-    if (favoriteArtworks.isEmpty) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    
+    if (_favoriteArtworks.isEmpty) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -293,25 +231,42 @@ class _ProfileScreenState extends State<ProfileScreen>
       );
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.7,
+    return RefreshIndicator(
+      onRefresh: _loadFavorites,
+      child: GridView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.7,
+        ),
+        itemCount: _favoriteArtworks.length,
+        itemBuilder: (context, index) {
+          final artwork = _favoriteArtworks[index];
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailScreen(
+                    productId: artwork.id,
+                  ),
+                ),
+              ).then((_) {
+                // Tải lại danh sách yêu thích khi quay lại
+                _loadFavorites();
+              });
+            },
+            child: _buildArtworkCard(
+              artwork,
+              context,
+              _isFavorite,
+              _toggleFavorite,
+            ),
+          );
+        },
       ),
-      itemCount: favoriteArtworks.length,
-      itemBuilder: (context, index) {
-        return _buildArtworkCard(
-          favoriteArtworks[index],
-          context,
-          _isFavorite,
-          _toggleFavorite,
-          _removeFromCollection,
-          showDeleteButton: false, // Không hiển thị nút xóa cho tab yêu thích
-        );
-      },
     );
   }
 }
@@ -321,9 +276,8 @@ Widget _buildArtworkCard(
     ArtworkItem artwork,
     BuildContext context,
     bool Function(String) isFavorite,
-    void Function(String) toggleFavorite,
-    void Function(String) removeFromCollection,
-    {bool showDeleteButton = false}) {
+    Future<void> Function(String) toggleFavorite,
+    ) {
   return Container(
     decoration: BoxDecoration(
       color: Colors.white,
@@ -399,40 +353,16 @@ Widget _buildArtworkCard(
                       ],
                     ),
                     const SizedBox(height: 4),
-                    // Hàng cuối: Giá và nút xóa (nếu có)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${artwork.price} VNĐ',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: Colors.black,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        // Nút xóa khỏi cart
-                        if (showDeleteButton)
-                          GestureDetector(
-                            onTap: () => removeFromCollection(artwork.id),
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Icon(
-                                Icons.delete_outline,
-                                color: Colors.red,
-                                size: 18,
-                              ),
-                            ),
-                          ),
-                      ],
+                    // Hiển thị giá - ĐÃ CẬP NHẬT: Sử dụng _formatPrice
+                    Text(
+                      '${_formatPrice(artwork.price)} VNĐ',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: Colors.black,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -472,3 +402,24 @@ Widget _buildArtworkCard(
   );
 }
 
+// Thêm hàm _formatPrice vào cuối file profile_screen.dart
+String _formatPrice(String price) {
+  // Xử lý trường hợp giá có định dạng số thập phân
+  if (price.contains('.')) {
+    double? priceValue = double.tryParse(price);
+    if (priceValue != null) {
+      return priceValue.toInt().toString().replaceAllMapped(
+            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+            (Match m) => '${m[1]}.',
+          );
+    }
+  }
+
+  // Xử lý trường hợp giá đã có định dạng VNĐ
+  if (price.contains('VNĐ')) {
+    String priceStr = price.replaceAll('VNĐ', '').trim();
+    return priceStr;
+  }
+  // Trả về giá gốc nếu không xử lý được
+  return price;
+}

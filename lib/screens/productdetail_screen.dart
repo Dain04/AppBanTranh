@@ -9,6 +9,7 @@ import 'package:app_ban_tranh/models/prodcut.dart';
 import 'package:app_ban_tranh/database/database_helper.dart';
 import 'package:app_ban_tranh/repositories/cart_repository.dart';
 import 'package:app_ban_tranh/repositories/user_repository.dart';
+import 'package:app_ban_tranh/repositories/favorite_repository.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
@@ -29,10 +30,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   ScrollController thumbnailScrollController = ScrollController();
   bool _isLoading = true;
 
-  // Danh sách ID tác phẩm yêu thích
-  final List<String> _favoriteIds = [];
+  // Sử dụng FavoriteRepository thay vì danh sách cục bộ
+  final FavoriteRepository _favoriteRepository = FavoriteRepository();
   final CartRepository _cartRepository = CartRepository();
   final UserRepository _userRepository = UserRepository();
+  
+  // Biến để theo dõi trạng thái yêu thích của sản phẩm hiện tại
+  bool _isCurrentArtworkFavorite = false;
+  
   // Danh sách giỏ hàng (có thể chuyển thành state management sau này)
   final List<String> _cartItems = [];
 
@@ -121,7 +126,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       bool hasProducts = await dbHelper.hasProducts();
 
       if (!hasProducts) {
-        // Nếu chưa có sản phẩm, chỉ thêm newArtworks vào database
         print('Đang thêm dữ liệu mẫu newArtworks vào database...');
         await dbHelper.insertAllProducts(newArtworks);
         print('Đã thêm ${newArtworks.length} sản phẩm vào database');
@@ -133,6 +137,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       if (currentArtwork == null) {
         // Nếu không tìm thấy trong database, thử tìm trong dữ liệu cứng (legacy)
         _findArtworkById();
+      }
+      
+      // Kiểm tra trạng thái yêu thích của sản phẩm hiện tại
+      if (currentArtwork != null) {
+        _isCurrentArtworkFavorite = await _favoriteRepository.isFavorite(currentArtwork!.id);
+      }
+      
+      // Lấy số lượng sản phẩm trong giỏ hàng
+      final cartItemCount = await _cartRepository.getCartItemCount();
+      _cartItems.clear();
+      for (int i = 0; i < cartItemCount; i++) {
+        _cartItems.add('item');
       }
     } catch (e) {
       print('Lỗi khi tải dữ liệu: $e');
@@ -190,33 +206,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   // Hàm kiểm tra tác phẩm có được yêu thích không
   bool _isFavorite(String id) {
-    return _favoriteIds.contains(id);
+    if (id == currentArtwork?.id) {
+      return _isCurrentArtworkFavorite;
+    }
+    return false;
   }
 
   // Hàm toggle trạng thái yêu thích
-  void _toggleFavorite(String id) {
-    setState(() {
-      if (_favoriteIds.contains(id)) {
-        _favoriteIds.remove(id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã xóa khỏi danh sách yêu thích'),
-            duration: Duration(seconds: 1),
-          ),
-        );
-      } else {
-        _favoriteIds.add(id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã thêm vào danh sách yêu thích'),
-            duration: Duration(seconds: 1),
-          ),
-        );
-      }
-    });
+  Future<void> _toggleFavorite(String id) async {
+    final success = await _favoriteRepository.toggleFavorite(id);
+    
+    if (success) {
+      setState(() {
+        _isCurrentArtworkFavorite = !_isCurrentArtworkFavorite;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_isCurrentArtworkFavorite 
+            ? 'Đã thêm vào danh sách yêu thích' 
+            : 'Đã xóa khỏi danh sách yêu thích'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
   }
 
-// Cập nhật phương thức _addToCart
+  // Cập nhật phương thức _addToCart
   void _addToCart(String id) async {
     if (currentArtwork != null) {
       final success = await _cartRepository.addToCart(currentArtwork!);
@@ -1244,7 +1260,8 @@ Widget _buildSimilarProduct(ArtworkItem artwork) {
   );
 }
 
-// Hàm định dạng giá tiền - thêm mới
+// Thay thế hàm _formatPrice ở cuối file profile_screen.dart bằng hàm này:
+
 String _formatPrice(String price) {
   // Xử lý trường hợp giá có định dạng số thập phân
   if (price.contains('.')) {
@@ -1263,8 +1280,8 @@ String _formatPrice(String price) {
     return priceStr;
   }
 
-  // Xử lý các trường hợp khác
-  if (price != 'Price on request') {
+  // Xử lý các trường hợp khác (chỉ xử lý giá tiền thông thường)
+  if (price != '' && price != 'Price on request') {
     String priceStr = price.replaceAll('.', '').replaceAll(',', '');
     int? numPrice = int.tryParse(priceStr);
     if (numPrice != null) {
