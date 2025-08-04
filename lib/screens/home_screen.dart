@@ -24,32 +24,13 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  // Danh sách ID tác phẩm yêu thích
-  List<String> _favoriteIds = [];
-
   // Danh sách hình ảnh cho banner
   final List<String> _bannerImages = [
-    'https://i.pinimg.com/736x/31/cd/94/31cd94a04cb4c362c67ee69419e51723.jpg',
-    'https://i.pinimg.com/736x/31/cd/94/31cd94a04cb4c362c67ee69419e51723.jpg',
-    'https://i.pinimg.com/736x/31/cd/94/31cd94a04cb4c362c67ee69419e51723.jpg',
-    'https://i.pinimg.com/736x/31/cd/94/31cd94a04cb4c362c67ee69419e51723.jpg',
+    'assets/images/td1.jpg',
+    'https://i.pinimg.com/736x/47/d7/2a/47d72a2a7265eae638b92f7d32dff9a8.jpg',
+    'assets/images/thongdiep2.png',
+    'https://i.pinimg.com/736x/b5/bd/c4/b5bdc4d6bbe4c85cb4a6e02407e41c2e.jpg',
   ];
-
-  // Hàm kiểm tra tác phẩm có được yêu thích không
-  bool _isFavorite(String id) {
-    return _favoriteIds.contains(id);
-  }
-
-  // Hàm toggle trạng thái yêu thích
-  void _toggleFavorite(String id) {
-    setState(() {
-      if (_favoriteIds.contains(id)) {
-        _favoriteIds.remove(id);
-      } else {
-        _favoriteIds.add(id);
-      }
-    });
-  }
 
   @override
   void dispose() {
@@ -137,10 +118,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     itemCount: _bannerImages.length,
                     itemBuilder: (context, index) {
-                      return Image.network(
-                        _bannerImages[index],
-                        fit: BoxFit.cover,
-                      );
+                      final imagePath = _bannerImages[index];
+                      return imagePath.startsWith('http')
+                          ? Image.network(
+                              imagePath,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            )
+                          : Image.asset(
+                              imagePath,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            );
                     },
                   ),
                   // Page indicator
@@ -227,8 +216,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _buildHomeArtworkCard(
                             homenewArtworks[index],
                             context,
-                            _isFavorite,
-                            _toggleFavorite,
                           ),
                         );
                       },
@@ -980,8 +967,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHomeArtworkCard(
     ArtworkItem artwork,
     BuildContext context,
-    bool Function(String) isFavorite,
-    void Function(String) toggleFavorite,
   ) {
     return Container(
       decoration: BoxDecoration(
@@ -1075,21 +1060,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                               color: Colors.black,
-                            ),
-                          ),
-                          // Icon trái tim
-                          GestureDetector(
-                            onTap: () {
-                              toggleFavorite(artwork.id);
-                            },
-                            child: Icon(
-                              isFavorite(artwork.id)
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: isFavorite(artwork.id)
-                                  ? Colors.red
-                                  : Colors.grey[600],
-                              size: 20,
                             ),
                           ),
                         ],
