@@ -233,70 +233,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     const SizedBox(height: 16),
 
-                    // ------------------- Divider OR -------------------
-                    Row(
-                      children: [
-                        Expanded(child: Divider(color: Colors.grey[300])),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'Hoặc',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                        Expanded(child: Divider(color: Colors.grey[300])),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // ------------------- Đăng nhập với Google -------------------
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          _handleGoogleLogin(); // Gọi hàm xử lý Google Login
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.orange),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 30,
-                              height: 30,
-                              child: Center(
-                                child: Image.asset(
-                                  'assets/images/logoGoogle.png',
-                                  width: 35,
-                                  height: 35,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Text('Lỗi ảnh',
-                                        style: TextStyle(color: Colors.red));
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Đăng nhập bằng Google',
-                              style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
+                  
 
                     // ------------------- Link đến màn hình đăng nhập -------------------
                     RichText(
