@@ -11,5 +11,4 @@ final List<Genres> homeGalleries = [
   Genres(name: 'Hiện đại', imagePath: 'assets/images/modernstyle.jpg'),
   Genres(name: 'Bối cảnh', imagePath: 'assets/images/scene.jpg'),
   Genres(name: 'Chân dung', imagePath: 'assets/images/portrait.jpg'),
-  Genres(name: 'Văn hoá', imagePath: 'assets/images/Cultural.jpg'),
 ];

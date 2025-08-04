@@ -11,8 +11,11 @@ import 'package:app_ban_tranh/screens/profile_screen.dart';
 import 'package:app_ban_tranh/repositories/user_repository.dart';
 
 class ProductPageScreen extends StatefulWidget {
+  final String? initialGenre; // Thêm tham số để có thể truyền thể loại ban đầu
+  
   const ProductPageScreen({
     super.key,
+    this.initialGenre,
   });
 
   @override
@@ -21,15 +24,26 @@ class ProductPageScreen extends StatefulWidget {
 
 class _ProductPageScreenState extends State<ProductPageScreen> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
-  List<ArtworkItem> _products = [];
+  List<ArtworkItem> _allProducts = []; // Lưu tất cả sản phẩm
+  List<ArtworkItem> _filteredProducts = []; // Lưu sản phẩm đã lọc
   bool _isLoading = true;
-  int _selectedIndex = 0; // Thêm biến để theo dõi tab đang chọn
+  int _selectedIndex = 0;
   final UserRepository _userRepository = UserRepository();
+  String? _selectedGenre; // Thêm biến để lưu thể loại đang được chọn
+  String _searchQuery = ''; // Thêm biến để lưu từ khóa tìm kiếm
+  TextEditingController _searchController = TextEditingController(); // Controller cho ô tìm kiếm
 
   @override
   void initState() {
     super.initState();
+    _selectedGenre = widget.initialGenre; // Khởi tạo thể loại từ tham số
     _loadProducts();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   // Phương thức để tải sản phẩm từ database
@@ -44,20 +58,49 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
     if (!hasProducts) {
       // Nếu chưa có sản phẩm, thêm dữ liệu mẫu từ product.dart
       await _databaseHelper.insertAllProducts([
-        // ...homenewArtworks,
         ...newArtworks,
-        // ...DauGiaTP,
-        // ...GioHang_TP
       ]);
     }
 
     // Lấy tất cả sản phẩm từ database
-    _products = await _databaseHelper.getAllProducts();
+    _allProducts = await _databaseHelper.getAllProducts();
+    
+    // Lọc sản phẩm theo thể loại và từ khóa tìm kiếm
+    _filterProducts();
 
     setState(() {
       _isLoading = false;
     });
   }
+
+  // Phương thức lọc sản phẩm theo thể loại và từ khóa tìm kiếm
+void _filterProducts() {
+  if (_selectedGenre == null && _searchQuery.isEmpty) {
+    // Nếu không có thể loại nào được chọn và không có từ khóa tìm kiếm
+    _filteredProducts = List.from(_allProducts);
+  } else {
+    // Lọc sản phẩm theo thể loại và từ khóa tìm kiếm
+    _filteredProducts = _allProducts.where((product) {
+      // Kiểm tra xem thể loại có khớp không (không phân biệt hoa thường)
+      bool matchesGenre = _selectedGenre == null || 
+          product.genre?.toLowerCase() == _selectedGenre?.toLowerCase();
+      
+      // In ra thông tin để debug
+      print('Product: ${product.title}, Genre: ${product.genre}, Selected: $_selectedGenre, Matches: $matchesGenre');
+      
+      // Kiểm tra xem từ khóa tìm kiếm có khớp không
+      bool matchesSearch = _searchQuery.isEmpty || 
+          product.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          product.artist.toLowerCase().contains(_searchQuery.toLowerCase());
+      
+      return matchesGenre && matchesSearch;
+    }).toList();
+  }
+  
+  // In ra số lượng sản phẩm đã lọc để debug
+  print('Filtered products count: ${_filteredProducts.length}');
+}
+
 
   // Phương thức xử lý khi chọn tab
   void _onItemTapped(int index) async {
@@ -111,9 +154,9 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'Trở lại trang chủ',
-          style: TextStyle(
+        title: Text(
+          _selectedGenre != null ? 'Thể loại: $_selectedGenre' : 'Tất cả tác phẩm',
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -138,23 +181,67 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
                   children: [
                     // Search Box
                     TextField(
+                      controller: _searchController,
                       decoration: InputDecoration(
                         hintText: 'Tìm kiếm',
-                        prefixIcon: Icon(Icons.search),
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  setState(() {
+                                    _searchController.clear();
+                                    _searchQuery = '';
+                                    _filterProducts();
+                                  });
+                                },
+                              )
+                            : null,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(
-                              color: const Color.fromARGB(255, 52, 51, 51),
+                          borderSide: const BorderSide(
+                              color: Color.fromARGB(255, 52, 51, 51),
                               width: 1.0),
                         ),
                         filled: true,
                         fillColor: Colors.grey[200],
                       ),
                       onChanged: (value) {
-                        print('Tìm kiếm: $value');
+                        setState(() {
+                          _searchQuery = value;
+                          _filterProducts();
+                        });
                       },
                     ),
                     const SizedBox(height: 20),
+
+                    // Hiển thị thể loại đã chọn (nếu có)
+                    if (_selectedGenre != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'Thể loại đã chọn: ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Chip(
+                              label: Text(_selectedGenre!),
+                              deleteIcon: const Icon(Icons.close, size: 18),
+                              onDeleted: () {
+                                setState(() {
+                                  _selectedGenre = null;
+                                  _filterProducts();
+                                });
+                              },
+                              backgroundColor: Colors.blue.withOpacity(0.2),
+                            ),
+                          ],
+                        ),
+                      ),
 
                     // Artwork Categories Section
                     Column(
@@ -164,7 +251,7 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
                           padding: EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 8),
                           child: Text(
-                            'Thể loại nghệ thuật',
+                            'Thể loại nghệ thuật',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
@@ -176,7 +263,21 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
                             child: Row(
                               children: homeGalleries.map((genre) {
                                 return _buildCategoryItem(
-                                    genre.name, genre.imagePath);
+                                  genre.name, 
+                                  genre.imagePath,
+                                  isSelected: _selectedGenre == genre.name,
+                                  onTap: () {
+                                    setState(() {
+                                      // Nếu đã chọn thể loại này, bỏ chọn
+                                      if (_selectedGenre == genre.name) {
+                                        _selectedGenre = null;
+                                      } else {
+                                        _selectedGenre = genre.name;
+                                      }
+                                      _filterProducts();
+                                    });
+                                  },
+                                );
                               }).toList(),
                             ),
                           ),
@@ -192,13 +293,28 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
                           Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Tác phẩm mới',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
+                                Row(
+                                  mainAxisAlignment: 
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      _selectedGenre != null 
+                                          ? 'Tác phẩm thể loại $_selectedGenre' 
+                                          : 'Tất cả tác phẩm',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${_filteredProducts.length} tác phẩm',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 4),
                                 // dòng kẻ màu xanh
@@ -210,23 +326,61 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
                               ]),
                           const SizedBox(height: 20),
 
-                          /// Danh sách các tác phẩm nghệ thuật từ database
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16.0,
-                              mainAxisSpacing: 16.0,
-                              childAspectRatio: 0.55,
+                          // Hiển thị thông báo khi không có sản phẩm
+                          if (_filteredProducts.isEmpty)
+                            Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(32.0),
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      Icons.search_off,
+                                      size: 64,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Không tìm thấy sản phẩm',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _selectedGenre != null
+                                          ? 'Không có sản phẩm nào thuộc thể loại $_selectedGenre'
+                                          : 'Không tìm thấy sản phẩm phù hợp với từ khóa tìm kiếm',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[500],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            itemCount: _products.length,
-                            itemBuilder: (context, index) {
-                              return _buildArtworkCard(
-                                  context, _products[index]);
-                            },
-                          )
+
+                          // Danh sách các tác phẩm nghệ thuật đã lọc
+                          if (_filteredProducts.isNotEmpty)
+                            GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 16.0,
+                                mainAxisSpacing: 16.0,
+                                childAspectRatio: 0.55,
+                              ),
+                              itemCount: _filteredProducts.length,
+                              itemBuilder: (context, index) {
+                                return _buildArtworkCard(
+                                    context, _filteredProducts[index]);
+                              },
+                            )
                         ])
                   ],
                 ),
@@ -301,18 +455,46 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
                   ),
                 );
               },
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                      image: DecorationImage(
+                        image: AssetImage(artwork.imagePath),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
-                  image: DecorationImage(
-                    image: AssetImage(artwork.imagePath),
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                  // Hiển thị badge thể loại
+                  if (artwork.genre != null && artwork.genre!.isNotEmpty)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          artwork.genre!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -417,40 +599,87 @@ class _ProductPageScreenState extends State<ProductPageScreen> {
       ),
     );
   }
-}
 
-// Widget cho danh sách thể loại nghệ thuật
-Widget _buildCategoryItem(String title, String imagePath) {
-  return Padding(
-    padding: const EdgeInsets.only(left: 16.0),
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(imagePath),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.3),
-                BlendMode.darken,
+  // Cập nhật Widget cho danh sách thể loại nghệ thuật
+  Widget _buildCategoryItem(String title, String imagePath, {
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16.0),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(imagePath),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    isSelected
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.black.withOpacity(0.4),
+                    BlendMode.darken,
+                  ),
+                ),
+                borderRadius: BorderRadius.circular(8),
+                // Thêm viền khi được chọn
+                border: isSelected
+                    ? Border.all(color: Colors.blue, width: 3)
+                    : null,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.5),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        )
+                      ]
+                    : null,
               ),
             ),
-            borderRadius: BorderRadius.circular(8),
-          ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    color: Colors.white,
+                    fontSize: isSelected ? 16 : 14,
+                  ),
+                ),
+                if (isSelected)
+                  Container(
+                    margin: const EdgeInsets.only(top: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Đã chọn',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
-        Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
-          ),
-        ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
 
 // Thêm hàm định dạng giá tiền - giống hàm trong productdetail_screen.dart

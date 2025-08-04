@@ -82,7 +82,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // Tạo bảng products
+    // Tạo bảng products (đã cập nhật với cột genre)
     await db.execute('''
       CREATE TABLE products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,6 +98,7 @@ class DatabaseHelper {
         artist TEXT,
         material TEXT,
         year_created TEXT,
+        genre TEXT,
         FOREIGN KEY (category_id) REFERENCES categories (id)
       )
     ''');
@@ -210,6 +211,7 @@ class DatabaseHelper {
             artist TEXT,
             material TEXT,
             year_created TEXT,
+            genre TEXT,
             FOREIGN KEY (category_id) REFERENCES categories (id)
           )
         ''');
@@ -226,6 +228,8 @@ class DatabaseHelper {
           columns.any((column) => column['name'] == 'material');
       bool hasYearCreatedColumn =
           columns.any((column) => column['name'] == 'year_created');
+      bool hasGenreColumn =
+          columns.any((column) => column['name'] == 'genre');
 
       // Thêm các cột nếu chưa tồn tại
       if (!hasArtistColumn) {
@@ -241,6 +245,11 @@ class DatabaseHelper {
       if (!hasYearCreatedColumn) {
         print('Thêm cột year_created vào bảng products');
         await db.execute('ALTER TABLE products ADD COLUMN year_created TEXT');
+      }
+
+      if (!hasGenreColumn) {
+        print('Thêm cột genre vào bảng products');
+        await db.execute('ALTER TABLE products ADD COLUMN genre TEXT');
       }
     } catch (e) {
       print('Lỗi khi kiểm tra cấu trúc bảng: $e');
@@ -267,9 +276,10 @@ class DatabaseHelper {
       'artist': artwork.artist,
       'material': artwork.material ?? '',
       'year_created': artwork.yearcreated ?? '',
+      'genre': artwork.genre ?? '',  // Lưu thông tin thể loại
       'created_at': DateTime.now().toIso8601String(),
       'updated_at': DateTime.now().toIso8601String(),
-      'category_id': null, // Sẽ cập nhật sau khi có category
+      'category_id': null,
       'stock_quantity': 1,
       'is_featured': 0,
     };
@@ -291,7 +301,7 @@ class DatabaseHelper {
       return productId;
     } catch (e) {
       print('Lỗi khi thêm sản phẩm: $e');
-      throw e; // Re-throw để caller có thể xử lý
+      throw e;
     }
   }
 
@@ -317,9 +327,10 @@ class DatabaseHelper {
             'artist': artwork.artist,
             'material': artwork.material ?? '',
             'year_created': artwork.yearcreated ?? '',
+            'genre': artwork.genre ?? '',  // Lưu thông tin thể loại
             'created_at': DateTime.now().toIso8601String(),
             'updated_at': DateTime.now().toIso8601String(),
-            'category_id': null, // Sẽ cập nhật sau khi có category
+            'category_id': null,
             'stock_quantity': 1,
             'is_featured': 0,
           };
@@ -360,6 +371,7 @@ class DatabaseHelper {
               'artist': artwork.artist,
               'material': artwork.material ?? '',
               'year_created': artwork.yearcreated ?? '',
+              'genre': artwork.genre ?? '',  // Lưu thông tin thể loại
               'created_at': DateTime.now().toIso8601String(),
               'updated_at': DateTime.now().toIso8601String(),
               'category_id': null,
@@ -423,7 +435,7 @@ class DatabaseHelper {
           imagePath: productMap['image_url'] ?? '',
           material: productMap['material'],
           yearcreated: productMap['year_created'],
-          genre: '', // Sẽ cập nhật sau khi có category
+          genre: productMap['genre'] ?? '',  // Lấy thông tin thể loại từ database
           additionalImages: additionalImages,
         );
       }).toList());
@@ -469,12 +481,61 @@ class DatabaseHelper {
         imagePath: productMaps.first['image_url'] ?? '',
         material: productMaps.first['material'],
         yearcreated: productMaps.first['year_created'],
-        genre: '', // Sẽ cập nhật sau khi có category
+        genre: productMaps.first['genre'] ?? '',  // Lấy thông tin thể loại từ database
         additionalImages: additionalImages,
       );
     } catch (e) {
       print('Lỗi khi lấy sản phẩm theo ID: $e');
       return null;
+    }
+  }
+
+  /// Lấy sản phẩm theo thể loại
+  Future<List<ArtworkItem>> getProductsByGenre(String genre) async {
+    try {
+      final db = await database;
+
+      // Lấy sản phẩm theo thể loại
+      final List<Map<String, dynamic>> productMaps = await db.query(
+        'products',
+        where: 'genre = ?',
+        whereArgs: [genre],
+      );
+
+      if (productMaps.isEmpty) {
+        return [];
+      }
+
+      // Chuyển đổi từ Map sang ArtworkItem
+      return Future.wait(productMaps.map((productMap) async {
+        // Lấy các ảnh phụ của sản phẩm
+        final List<Map<String, dynamic>> imageMaps = await db.query(
+          'product_images',
+          where: 'product_id = ?',
+          whereArgs: [productMap['id']],
+        );
+
+        List<String> additionalImages = imageMaps
+            .map((imageMap) => imageMap['image_url'] as String)
+            .toList();
+
+        // Tạo đối tượng ArtworkItem
+        return ArtworkItem(
+          id: productMap['id'].toString(),
+          title: productMap['name'] ?? '',
+          artist: productMap['artist'] ?? '',
+          price: productMap['price']?.toString() ?? '0',
+          description: productMap['description'] ?? '',
+          imagePath: productMap['image_url'] ?? '',
+          material: productMap['material'],
+          yearcreated: productMap['year_created'],
+          genre: productMap['genre'] ?? '',
+          additionalImages: additionalImages,
+        );
+      }).toList());
+    } catch (e) {
+      print('Lỗi khi lấy sản phẩm theo thể loại: $e');
+      return [];
     }
   }
 
