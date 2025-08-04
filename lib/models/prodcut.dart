@@ -44,7 +44,7 @@ final List<ArtworkItem> homenewArtworks = [
     id: '2',
     title: 'Think',
     artist: 'Doonstrij2',
-    price: '100,000,000',
+    price: '140,000,000',
     material: '',
     yearcreated: '2023',
     genre: 'Hoa',
@@ -55,7 +55,7 @@ final List<ArtworkItem> homenewArtworks = [
     id: '3',
     title: 'Old War',
     artist: 'Rune Quizzter',
-    price: 'Price on request',
+    price: '170,670,000',
     material: '',
     yearcreated: '2023',
     genre: 'Hiện đại',
@@ -66,19 +66,30 @@ final List<ArtworkItem> homenewArtworks = [
     id: '4',
     title: 'Blood Falls',
     artist: 'Doonstrij2',
-    price: '100,000,000',
+    price: '10,000,000',
     material: '',
     yearcreated: '2023',
     genre: 'Hoa',
     description: 'A powerful piece depicting the struggles of war.',
     imagePath: 'assets/images/flowerstyle.jpg',
   ),
+    ArtworkItem(
+    id: '5',
+    title: 'Hoa Rừng',
+    artist: 'Dain',
+    yearcreated: '2020',
+    genre: 'Hoa',
+    price: '123,078,000',
+    description: 'Vẻ đẹp thời đại của khoản khắt.',
+    imagePath: 'assets/images/bh2.jpg',
+    material: '',
+  ),
 ];
 
 // Dữ liệu mẫu cho các tác phẩm nghệ thuật
 final List<ArtworkItem> newArtworks = [
   ArtworkItem(
-      id: '5',
+      id: '6',
       title: 'Flower in Oddy',
       artist: 'LT Nghiax',
       price: '100,000,000',
@@ -93,7 +104,7 @@ final List<ArtworkItem> newArtworks = [
         'assets/images/bh2.jpg',
       ]),
   ArtworkItem(
-    id: '6',
+    id: '7',
     title: 'Think',
     artist: 'Doonstrij2',
     price: '140,000,000',
@@ -104,7 +115,7 @@ final List<ArtworkItem> newArtworks = [
     material: '',
   ),
   ArtworkItem(
-    id: '7',
+    id: '8',
     title: 'Old War',
     artist: 'Rune Quizzter',
     price: '170,670,000',
@@ -115,7 +126,7 @@ final List<ArtworkItem> newArtworks = [
     material: '',
   ),
   ArtworkItem(
-    id: '8',
+    id: '9',
     title: 'Blood Falls',
     artist: 'Doonstrij2',
     yearcreated: '2023',
@@ -126,7 +137,7 @@ final List<ArtworkItem> newArtworks = [
     material: '',
   ),
   ArtworkItem(
-    id: '9',
+    id: '10',
     title: 'Hoa Rừng',
     artist: 'Dain',
     yearcreated: '2020',
