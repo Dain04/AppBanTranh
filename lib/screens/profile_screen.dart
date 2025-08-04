@@ -24,13 +24,13 @@ class _ProfileScreenState extends State<ProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final FavoriteRepository _favoriteRepository = FavoriteRepository();
-  
+
   // Danh sách ID tác phẩm yêu thích
   List<String> _favoriteIds = [];
-  
+
   // Danh sách tác phẩm yêu thích
   List<ArtworkItem> _favoriteArtworks = [];
-  
+
   bool _isLoading = true;
 
   @override
@@ -45,11 +45,11 @@ class _ProfileScreenState extends State<ProfileScreen>
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       // Lấy danh sách ID yêu thích
       _favoriteIds = await _favoriteRepository.getFavoriteIds();
-      
+
       // Lọc ra các tác phẩm yêu thích từ tất cả tác phẩm
       _favoriteArtworks = _allArtworks
           .where((artwork) => _favoriteIds.contains(artwork.id))
@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   // Hàm toggle trạng thái yêu thích
   Future<void> _toggleFavorite(String id) async {
     final success = await _favoriteRepository.toggleFavorite(id);
-    
+
     if (success) {
       await _loadFavorites(); // Tải lại danh sách sau khi thay đổi
     }
@@ -199,7 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (_favoriteArtworks.isEmpty) {
       return const Center(
         child: Column(
@@ -273,11 +273,11 @@ class _ProfileScreenState extends State<ProfileScreen>
 
 // Widget để hiển thị card tác phẩm nghệ thuật
 Widget _buildArtworkCard(
-    ArtworkItem artwork,
-    BuildContext context,
-    bool Function(String) isFavorite,
-    Future<void> Function(String) toggleFavorite,
-    ) {
+  ArtworkItem artwork,
+  BuildContext context,
+  bool Function(String) isFavorite,
+  Future<void> Function(String) toggleFavorite,
+) {
   return Container(
     decoration: BoxDecoration(
       color: Colors.white,
@@ -340,7 +340,7 @@ Widget _buildArtworkCard(
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 5),
                         Text(
                           'Artist: ${artwork.artist}',
                           style: TextStyle(
@@ -350,19 +350,16 @@ Widget _buildArtworkCard(
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 5),
+                        Text(
+                          'Giá: ${_formatPrice(artwork.price)} VNĐ',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 255, 92, 92),
+                          ),
+                        ),
                       ],
-                    ),
-                    const SizedBox(height: 4),
-                    // Hiển thị giá - ĐÃ CẬP NHẬT: Sử dụng _formatPrice
-                    Text(
-                      '${_formatPrice(artwork.price)} VNĐ',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: Colors.black,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
