@@ -181,14 +181,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    '${_formatPrice(item.price.toString())} VNĐ', // Chuyển đổi double thành String
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -581,7 +573,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           _buildSummaryRow(
               'Tổng tiền:', '${_formatPrice(total.toString())} VNĐ',
               isTotal: true),
-          _buildSummaryRow('Phương thức thanh toán:', 'Visa Card'),
+          _buildSummaryRow('Phương thức thanh toán:', _getPaymentMethodName()),
           Text(
             '*Việc mua hàng của bạn sẽ được bảo vệ',
             style: TextStyle(
@@ -592,6 +584,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ],
       ),
     );
+  }
+
+  String _getPaymentMethodName() {
+    switch (_selectedPaymentMethod) {
+      case 'visa':
+        return 'Thẻ Visa';
+      case 'napas':
+        return 'Thẻ Napas';
+      case 'bank':
+        return 'Chuyển khoản ngân hàng';
+      case 'momo':
+        return 'Ví MoMo';
+      case 'zalopay':
+        return 'ZaloPay';
+      default:
+        return 'Thẻ Visa';
+    }
   }
 
   Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
@@ -735,6 +744,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
       ),
     );
 
+    // Tạo đơn hàng mới
+    final newOrder = _createOrderFromCurrentData();
+    
+    // Thêm đơn hàng vào danh sách mẫu
+    OrderData.sampleOrders.add(newOrder);
+
     // Simulate payment processing
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pop(context); // Close loading dialog
@@ -743,6 +758,36 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _showSuccessDialog(context);
     });
   }
+
+Order _createOrderFromCurrentData() {
+  final item = widget.orderItems[0];
+  const deliveryFee = 1000000;
+  final price = item.price.toInt();
+  final subtotal = price + deliveryFee;
+  final tax = (subtotal * 0.05).round();
+  final total = subtotal + tax;
+  
+  // Tạo ID đơn hàng ngẫu nhiên
+  final orderId = 'ORD${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
+  
+  return Order(
+    id: orderId,
+    userId: 'current_user', // Thêm userId (có thể lấy từ hệ thống đăng nhập nếu có)
+    customerName: widget.customerInfo['name'] ?? 'Khách hàng',
+    customerPhone: widget.customerInfo['phone'] ?? '',
+    customerAddress: '${widget.customerInfo['address'] ?? ''}, ${widget.customerInfo['city'] ?? ''}',
+    orderDate: DateTime.now(),
+    deliveryDate: DateTime.now().add(const Duration(days: 7)), // Dự kiến giao sau 7 ngày
+    status: OrderStatus.pending, // Trạng thái ban đầu là chờ xác nhận
+    items: widget.orderItems,
+    subtotal: subtotal.toDouble(), // Thêm subtotal
+    totalAmount: total.toDouble(),
+    paymentMethod: _getPaymentMethodName(),
+    isPaid: true, // Đã thanh toán
+    notes: widget.customerInfo['notes'],
+  );
+}
+
 
   void _showSuccessDialog(BuildContext context) {
     showDialog(
@@ -773,7 +818,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
-                        // Nếu không có ảnh, hiển thị icon mặc định
                         errorBuilder: (context, error, stackTrace) {
                           return const Icon(
                             Icons.celebration,
@@ -800,7 +844,37 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: Colors.blue,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Đóng dialog
+                      // Chuyển đến trang đơn hàng
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => UserOrderScreen(userId: 'current_user'),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Xem đơn hàng',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
@@ -821,7 +895,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -851,7 +924,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
     super.dispose();
   }
 }
-
 class _CardNumberInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(

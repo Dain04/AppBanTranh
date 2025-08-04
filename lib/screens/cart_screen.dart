@@ -18,7 +18,7 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Giỏ hàng',
+          'Giỏ hàng',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -171,15 +171,15 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                   //chất liệu
                   Text(
-                    'Chất liệu: ${(item.material ?? 'N/A')}',
+                    'Chất liệu: ${(item.material ?? 'N/A')}',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[500],
                     ),
                   ),
-                  //giá
+                  //giá
                   Text(
-                    'Giá: ${(item.price)} VNĐ',
+                    'Giá: ${(item.price)} VNĐ',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -196,10 +196,13 @@ class _CartScreenState extends State<CartScreen> {
                       //btn thanh toán
                       GestureDetector(
                         onTap: () {
+                          // Truyền trực tiếp CartArtworkItem sang InfoPaymentScreen
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => InfoPaymentScreen(),
+                              builder: (context) => InfoPaymentScreen(
+                                cartItem: item, // Truyền item từ giỏ hàng
+                              ),
                             ),
                           );
                         },
