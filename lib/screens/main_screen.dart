@@ -5,9 +5,9 @@ import 'package:app_ban_tranh/screens/cart_screen.dart';
 import 'package:app_ban_tranh/repositories/user_repository.dart';
 import 'package:app_ban_tranh/models/user.dart';
 import 'home_screen.dart';
-import 'Live_screen.dart';
 import 'order_screen.dart';
 import 'profile_screen.dart';
+
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
@@ -31,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> _loadCurrentUser() async {
     try {
       final user = await _userRepository.getCurrentUser();
-      
+
       if (user == null) {
         // Nếu không có user đăng nhập, chuyển về login
         if (mounted) {
@@ -42,17 +42,16 @@ class _MainScreenState extends State<MainScreen> {
         }
         return;
       }
-      
+
       setState(() {
         _currentUser = user;
         _isLoading = false;
       });
-      
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
-      
+
       // Hiển thị lỗi và chuyển về login
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -61,7 +60,7 @@ class _MainScreenState extends State<MainScreen> {
             backgroundColor: Colors.red,
           ),
         );
-        
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginScreen()),
