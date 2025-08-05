@@ -387,7 +387,7 @@ class OrderDetailDialog extends StatelessWidget {
                     SizedBox(height: 20),
 
                     // Products
-                    _buildProductsSection(order.items),
+                    // _buildProductsSection(order.items),
 
                     SizedBox(height: 20),
 
@@ -523,23 +523,23 @@ class OrderDetailDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildProductsSection(List<OrderItem> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Sản phẩm đã đặt',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
-          ),
-        ),
-        SizedBox(height: 12),
-        ...items.map((item) => _buildProductItem(item)).toList(),
-      ],
-    );
-  }
+  // Widget _buildProductsSection(List<OrderItem> items) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(
+  //         'Sản phẩm đã đặt',
+  //         style: TextStyle(
+  //           fontSize: 16,
+  //           fontWeight: FontWeight.bold,
+  //           color: Colors.grey[800],
+  //         ),
+  //       ),
+  //       SizedBox(height: 12),
+  //       ...items.map((item) => _buildProductItem(item)).toList(),
+  //     ],
+  //   );
+  // }
 
   Widget _buildProductItem(OrderItem item) {
     return Container(
